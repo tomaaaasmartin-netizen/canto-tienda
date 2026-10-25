@@ -220,29 +220,60 @@
       window.location.href = whatsappLink('Hola CANTO, quiero consultar por el calzado disponible.');
     }));
 
-    fetch('./productos.json')
-      .then(response => {
-        if (!response.ok) throw new Error('No se pudo leer productos.json');
-        return response.json();
-      })
-      .then(data => {
-        allProducts = Array.isArray(data) ? data.filter(p =>
-          p && p.marca && p.modelo && Number(p.precioLista) > 0 &&
-          p.sinDescuento === true && p.foto
-        ) : [];
-        const brands = [...new Set(allProducts.map(p => p.marca))].sort();
-        const select = document.getElementById('brandFilter');
-        brands.forEach(name => {
-          const option = document.createElement('option');
-          option.value = name; option.textContent = name; select.appendChild(option);
-        });
-        renderProducts();
-      })
-      .catch(error => {
-        console.error(error);
-        document.getElementById('products').innerHTML =
-          '<div class="empty">No se pudo cargar el catálogo. Revisá que el archivo productos.json esté publicado junto a index.html.</div>';
-      });
+    const supabaseClient = window.supabase.createClient(
+  CANTO_SUPABASE_URL,
+  CANTO_SUPABASE_KEY
+);
+
+supabaseClient
+  .from('productos')
+  .select('id, marca, codigo, nombre, precio_lista, precio_venta, foto, activo')
+  .eq('activo', true)
+  .order('nombre')
+  .then(({ data, error }) => {
+    if (error) throw error;
+
+    allProducts = (data || [])
+      .filter(p =>
+        p.marca &&
+        p.nombre &&
+        Number(p.precio_lista) > 0 &&
+        p.foto
+      )
+      .map(p => ({
+        marca: p.marca,
+        modelo: p.nombre,
+        precioLista: Number(p.precio_lista),
+        precioVenta: Number(p.precio_venta),
+        foto: p.foto,
+        categoria: 'Deportiva',
+        genero: 'Unisex',
+        talles: [],
+        colores: [],
+        disponible: false,
+        sinDescuento: true
+      }));
+
+    const brands = [...new Set(allProducts.map(p => p.marca))].sort();
+    const select = document.getElementById('brandFilter');
+
+    select.querySelectorAll('option:not(:first-child)')
+      .forEach(option => option.remove());
+
+    brands.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+
+    renderProducts();
+  })
+  .catch(error => {
+    console.error('Error cargando productos:', error);
+    document.getElementById('products').innerHTML =
+      '<div class="empty">No se pudo cargar el catálogo. Intentá nuevamente más tarde.</div>';
+  });
   </script>
 </body>
 </html>
