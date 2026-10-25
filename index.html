@@ -181,67 +181,69 @@
     }
 
     function renderProducts() {
-      const container = document.getElementById('products');
-      const brand = document.getElementById('brandFilter').value;
-      const shown = allProducts.filter(p =>
-        (activeCategory === 'Todos' || p.categoria === activeCategory) &&
-        (brand === 'Todas' || p.marca === brand)
-      );
+  const container = document.getElementById('products');
+  const brand = document.getElementById('brandFilter').value;
 
-      if (!shown.length) {
-        container.innerHTML = '<div class="empty">Todavía no hay productos cargados para este filtro.<br>Estamos preparando el catálogo de CANTO.</div>';
-        return;
-      }
+  const shown = allProducts.filter(p =>
+    (activeCategory === 'Todos' || p.categoria === activeCategory) &&
+    (brand === 'Todas' || p.marca === brand)
+  );
 
-      container.innerHTML = shown.map(p => {
-        const salePrice = Math.round(Number(p.precioLista) * 0.85);
-        const image = p.foto ? `<img src="${escapeAttr(p.foto)}" alt="${escapeAttr(p.marca + ' ' + p.modelo)}" loading="lazy">` : '';
-        const sizes = Array.isArray(p.talles) && p.talles.length ? p.talles.join(', ') : 'Consultar talles';
-        const colors = Array.isArray(p.colores) && p.colores.length ? p.colores.join(', ') : 'Consultar colores';
-        return `<article class="product">
-          <div class="product-image">${image}<span class="tag">${escapeHtml(p.categoria || 'CALZADO')}</span></div>
-          <div class="product-info">
-            <p class="product-name">${escapeHtml(p.marca)} ${escapeHtml(p.modelo)}</p>
-            <div class="product-type">${escapeHtml(p.genero || 'Unisex')} · ${escapeHtml(colors)}</div>
-            <div class="price"><span class="old-price">${money(Number(p.precioLista))}</span>${money(salePrice)}</div>
-            <div class="availability">
-  <p>Elegí tu talle:</p>
-  <div class="size-options">
-    ${p.talles.map(t => `
-      <button
-        type="button"
-        class="size-option"
-        data-size="${escapeAttr(t)}">
-        ${escapeHtml(t)}
-      </button>
-    `).join('')}
-    container.querySelectorAll('.size-option').forEach(button => {
-  button.addEventListener('click', () => {
-    const card = button.closest('.product');
+  if (!shown.length) {
+    container.innerHTML =
+      '<div class="empty">Todavía no hay productos cargados para este filtro.<br>Estamos preparando el catálogo de CANTO.</div>';
+    return;
+  }
 
-    card.querySelectorAll('.size-option').forEach(size => {
-      size.classList.remove('selected');
-    });
+  container.innerHTML = shown.map(p => {
+    const salePrice = Math.round(Number(p.precioLista) * 0.85);
+    const image = p.foto
+      ? `<img src="${escapeAttr(p.foto)}" alt="${escapeAttr(p.marca + ' ' + p.modelo)}" loading="lazy">`
+      : '';
 
-    button.classList.add('selected');
-    card.dataset.selectedSize = button.dataset.size;
-  });
-});
-  </div>
-  <p>${p.disponible ? 'Disponibilidad a confirmar' : 'Consultar disponibilidad'}</p>
-</div>
-            <a class="order" href="${WHATSAPP_NUMBER.includes('X') ? '#contacto' : whatsappLink('Hola CANTO, quiero consultar por ' + p.marca + ' ' + p.modelo + '. Precio publicado: ' + money(salePrice) + '. ¿Me confirman talles y disponibilidad?')}">Consultar por WhatsApp</a>
+    const colors = Array.isArray(p.colores) && p.colores.length
+      ? p.colores.join(', ')
+      : 'Consultar colores';
+
+    return `
+      <article class="product">
+        <div class="product-image">
+          ${image}
+          <span class="tag">${escapeHtml(p.categoria || 'CALZADO')}</span>
+        </div>
+
+        <div class="product-info">
+          <p class="product-name">
+            ${escapeHtml(p.marca)} ${escapeHtml(p.modelo)}
+          </p>
+
+          <div class="product-type">
+            ${escapeHtml(p.genero || 'Unisex')} · ${escapeHtml(colors)}
           </div>
-        </article>`;
-      }).join('');
 
-      container.querySelectorAll('.order').forEach(link => link.addEventListener('click', event => {
-        if (WHATSAPP_NUMBER.includes('X')) {
-          event.preventDefault();
-          alert('Antes de recibir consultas, configurá el número de WhatsApp en index.html.');
-        }
-      }));
-    }
+          <div class="price">
+            <span class="old-price">${money(Number(p.precioLista))}</span>
+            ${money(salePrice)}
+          </div>
+
+          <button
+            type="button"
+            class="order choose-size"
+            data-product-id="${escapeAttr(String(p.id))}">
+            Elegir talle
+          </button>
+
+          <a class="order"
+            href="${WHATSAPP_NUMBER.includes('X')
+              ? '#contacto'
+              : whatsappLink('Hola CANTO, quiero consultar por ' + p.marca + ' ' + p.modelo + '. Precio publicado: ' + money(salePrice) + '. ¿Me confirman disponibilidad?')}">
+            Consultar por WhatsApp
+          </a>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>"']/g, ch => ({
