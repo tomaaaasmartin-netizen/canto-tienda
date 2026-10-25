@@ -77,6 +77,28 @@
       .how{grid-template-columns:1fr;gap:20px}
       footer{align-items:flex-start;flex-direction:column}
     }
+    .size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.size-option {
+  padding: 9px 12px;
+  border: 1px solid #c8bda9;
+  border-radius: 8px;
+  background: #fffdf9;
+  color: #626b5c;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.size-option.selected {
+  background: #607a72;
+  color: white;
+  border-color: #607a72;
+}
   </style>
   
 <script>
@@ -182,7 +204,32 @@
             <p class="product-name">${escapeHtml(p.marca)} ${escapeHtml(p.modelo)}</p>
             <div class="product-type">${escapeHtml(p.genero || 'Unisex')} · ${escapeHtml(colors)}</div>
             <div class="price"><span class="old-price">${money(Number(p.precioLista))}</span>${money(salePrice)}</div>
-            <div class="availability">${escapeHtml(sizes)}<br>${p.disponible === true ? 'Disponibilidad a confirmar' : 'Consultar disponibilidad'}</div>
+            <div class="availability">
+  <p>Elegí tu talle:</p>
+  <div class="size-options">
+    ${p.talles.map(t => `
+      <button
+        type="button"
+        class="size-option"
+        data-size="${escapeAttr(t)}">
+        ${escapeHtml(t)}
+      </button>
+    `).join('')}
+    container.querySelectorAll('.size-option').forEach(button => {
+  button.addEventListener('click', () => {
+    const card = button.closest('.product');
+
+    card.querySelectorAll('.size-option').forEach(size => {
+      size.classList.remove('selected');
+    });
+
+    button.classList.add('selected');
+    card.dataset.selectedSize = button.dataset.size;
+  });
+});
+  </div>
+  <p>${p.disponible ? 'Disponibilidad a confirmar' : 'Consultar disponibilidad'}</p>
+</div>
             <a class="order" href="${WHATSAPP_NUMBER.includes('X') ? '#contacto' : whatsappLink('Hola CANTO, quiero consultar por ' + p.marca + ' ' + p.modelo + '. Precio publicado: ' + money(salePrice) + '. ¿Me confirman talles y disponibilidad?')}">Consultar por WhatsApp</a>
           </div>
         </article>`;
