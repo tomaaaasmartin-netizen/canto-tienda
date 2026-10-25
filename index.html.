@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <meta name="description" content="CANTO — zapatillas urbanas, deportivas y esenciales para todos los días.">
+  <title>CANTO | Sneakers & Streetwear</title>
+  <style>
+    :root{--black:#111;--white:#fff;--gray:#f1f1f1;--mid:#777;--line:#dedede}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--white);color:var(--black);font-family:Arial,Helvetica,sans-serif}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .topline{background:#111;color:#fff;text-align:center;padding:9px 12px;font-size:11px;letter-spacing:1.5px}
+    header{height:70px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:10}
+    .logo{font-size:27px;font-weight:900;letter-spacing:5px}
+    nav{display:flex;gap:22px;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+    .menu{display:none;border:0;background:none;font-size:24px}
+    .hero{margin:18px auto 0;width:94%;min-height:390px;background:#171717;color:#fff;display:grid;grid-template-columns:1.1fr .9fr;overflow:hidden}
+    .hero-copy{padding:clamp(28px,6vw,72px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+    .eyebrow{font-size:11px;letter-spacing:3px;color:#bdbdbd;text-transform:uppercase}
+    h1{font-size:clamp(42px,7vw,78px);line-height:.92;letter-spacing:-3px;margin:18px 0}
+    .hero p{max-width:340px;color:#d0d0d0;line-height:1.6;font-size:14px}
+    .cta{display:inline-block;background:#fff;color:#111;padding:14px 20px;margin-top:17px;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:bold;border:1px solid #fff}
+    .cta:hover{background:#ddd}
+    .hero-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:280px;background:radial-gradient(circle at 50% 48%,#555 0,#272727 36%,#171717 70%)}
+    .hero-art:before{content:"C";position:absolute;font-weight:900;font-size:clamp(210px,35vw,390px);color:rgba(255,255,255,.045);line-height:1}
+    .shoe-shape{position:relative;width:78%;max-width:390px;aspect-ratio:1.5;transform:rotate(-17deg)}
+    .shoe-shape:before{content:"";position:absolute;left:5%;right:4%;bottom:17%;height:32%;background:linear-gradient(160deg,#fdfdfd,#bcbcbc);border-radius:65% 35% 24% 18%;transform:skewX(-17deg);box-shadow:0 24px 25px #0008}
+    .shoe-shape:after{content:"";position:absolute;left:15%;right:13%;bottom:12%;height:8%;background:#888;border-radius:50%;filter:blur(8px)}
+    .shoe-upper{position:absolute;left:18%;right:12%;bottom:37%;height:35%;background:linear-gradient(145deg,#fff,#aaa);border-radius:70% 45% 10% 20%;clip-path:polygon(0 58%,13% 35%,31% 10%,49% 19%,65% 48%,100% 70%,96% 100%,5% 100%);z-index:2}
+    .shoe-panel{position:absolute;left:37%;bottom:45%;width:26%;height:15%;border-top:5px solid #333;border-bottom:5px solid #333;transform:rotate(17deg);z-index:3;opacity:.85}
+    .shoe-sole{position:absolute;left:10%;right:8%;bottom:24%;height:8%;background:#fff;border-radius:50%;z-index:4;transform:rotate(-1deg)}
+    .section{padding:58px 5%}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:24px}
+    .section-head h2{font-size:clamp(25px,4vw,38px);letter-spacing:-1.3px;margin:0}
+    .section-head p{font-size:12px;color:var(--mid);margin:0}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+    .filter{border:1px solid #ccc;background:#fff;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;cursor:pointer}
+    .filter.active,.filter:hover{background:#111;color:#fff;border-color:#111}
+    .products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .product{min-width:0}
+    .product-image{aspect-ratio:1/1;background:#f0f0f0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .product-image img{width:100%;height:100%;object-fit:cover;display:block}
+    .tag{position:absolute;top:12px;left:12px;background:#111;color:#fff;font-size:9px;letter-spacing:1px;padding:7px 9px}
+    .product-info{padding:13px 1px}
+    .product-name{font-weight:bold;font-size:14px;margin:0 0 6px}
+    .product-type{font-size:11px;color:#777;margin-bottom:9px}
+    .price{font-size:14px;font-weight:bold}
+    .availability{font-size:10px;color:#666;margin-top:7px}
+    .order{display:block;text-align:center;border:1px solid #111;padding:12px 8px;margin-top:12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:bold}
+    .order:hover{background:#111;color:#fff}
+    .banner{margin:0 5%;background:#efefef;padding:35px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+    .banner h2{margin:0 0 8px;font-size:clamp(23px,4vw,34px);letter-spacing:-1px}
+    .banner p{margin:0;color:#666;font-size:13px;line-height:1.5}
+    .banner .cta{background:#111;color:#fff;border-color:#111;white-space:nowrap}
+    .how{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .how article{border-top:1px solid #111;padding-top:17px}
+    .number{font-size:11px;color:#777;letter-spacing:2px}
+    .how h3{font-size:16px;margin:10px 0}
+    .how p{font-size:12px;line-height:1.6;color:#666;margin:0}
+    footer{background:#111;color:#fff;padding:35px 5%;display:flex;justify-content:space-between;gap:20px;align-items:center}
+    footer .logo{font-size:23px}
+    footer p{font-size:11px;color:#aaa;line-height:1.5}
+    .social{font-size:11px;letter-spacing:1px}
+    .notice{font-size:11px;color:#777;margin:18px 5% 28px;line-height:1.6}
+    @media(max-width:700px){
+      header{height:62px}.logo{font-size:24px}nav{display:none}.menu{display:block}
+      .hero{grid-template-columns:1fr;margin-top:10px}.hero-copy{padding:34px 26px 24px}.hero-art{min-height:210px}
+      .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      .section{padding:42px 5%}.section-head{align-items:flex-start;flex-direction:column}
+      .banner{padding:25px;align-items:flex-start;flex-direction:column}
+      .how{grid-template-columns:1fr;gap:20px}
+      footer{align-items:flex-start;flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <div class="topline">CANTO — TU PRÓXIMO PAR EMPIEZA ACÁ</div>
+  <header>
+    <a class="logo" href="#" aria-label="CANTO inicio">CANTO</a>
+    <nav>
+      <a href="#catalogo">Zapatillas</a>
+      <a href="#como-comprar">Cómo comprar</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button class="menu" aria-label="Ir al catálogo" onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})">☰</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Sneakers · Streetwear · Sport</div>
+        <h1>CAMINÁ<br>A TU<br>MANERA.</h1>
+        <p>Estilo para todos los días. Descubrí modelos urbanos y deportivos elegidos para acompañar tu ritmo.</p>
+        <a class="cta" href="#catalogo">Ver colección</a>
+      </div>
+      <div class="hero-art" aria-label="Ilustración decorativa de una zapatilla">
+        <div class="shoe-shape"><div class="shoe-upper"></div><div class="shoe-panel"></div><div class="shoe-sole"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="catalogo">
+      <div class="section-head">
+        <div><div class="eyebrow" style="color:#777">Elegí tu próximo par</div><h2>LA COLECCIÓN</h2></div>
+        <p>Consultá disponibilidad de talle y color.</p>
+      </div>
+      <div class="filters" aria-label="Filtrar productos">
+        <button class="filter active" data-filter="Todos">Todos</button>
+        <button class="filter" data-filter="Urbana">Urbanas</button>
+        <button class="filter" data-filter="Deportiva">Deportivas</button>
+        <button class="filter" data-filter="Clásica">Clásicas</button>
+      </div>
+      <div class="products" id="products">
+        <article class="product" data-category="Urbana">
+          <div class="product-image"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Zapatilla roja de estilo urbano" loading="lazy"><span class="tag">URBANA</span></div>
+          <div class="product-info"><p class="product-name">Modelo Urban 01</p><div class="product-type">Estilo urbano · Varios talles</div><div class="price">Consultar precio</div><div class="availability">Por encargo · Sujeto a disponibilidad</div><a class="order" href="#" data-product="Modelo Urban 01">Consultar por WhatsApp</a></div>
+        </article>
+        <article class="product" data-category="Deportiva">
+          <div class="product-image"><img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=85" alt="Zapatillas deportivas" loading="lazy"><span class="tag">SPORT</span></div>
+          <div class="product-info"><p class="product-name">Modelo Sport 02</p><div class="product-type">Deportiva · Varios talles</div><div class="price">Consultar precio</div><div class="availability">Por encargo · Sujeto a disponibilidad</div><a class="order" href="#" data-product="Modelo Sport 02">Consultar por WhatsApp</a></div>
+        </article>
+        <article class="product" data-category="Clásica">
+          <div class="product-image"><img src="https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=800&q=85" alt="Zapatillas clásicas blancas" loading="lazy"><span class="tag">CLÁSICA</span></div>
+          <div class="product-info"><p class="product-name">Modelo Classic 03</p><div class="product-type">Clásica · Varios talles</div><div class="price">Consultar precio</div><div class="availability">Por encargo · Sujeto a disponibilidad</div><a class="order" href="#" data-product="Modelo Classic 03">Consultar por WhatsApp</a></div>
+        </article>
+      </div>
+      <p class="notice">Importante: estos modelos son de ejemplo para diseñar la página. Antes de publicar la tienda, reemplazá las fotos, los nombres y los precios por productos reales de tu proveedor. No uses fotos ni marcas de terceros de forma engañosa.</p>
+    </section>
+
+    <section class="banner">
+      <div><h2>¿Buscás un talle en especial?</h2><p>Escribinos. Consultamos disponibilidad con el proveedor antes de confirmar tu pedido.</p></div>
+      <a class="cta whatsapp-general" href="#contacto">Consultar por WhatsApp</a>
+    </section>
+
+    <section class="section" id="como-comprar">
+      <div class="section-head"><div><div class="eyebrow" style="color:#777">Simple y transparente</div><h2>¿CÓMO COMPRAR?</h2></div></div>
+      <div class="how">
+        <article><div class="number">01 / ELEGÍ</div><h3>Encontrá tu modelo</h3><p>Explorá el catálogo y elegí el modelo, color y talle que buscás.</p></article>
+        <article><div class="number">02 / CONSULTÁ</div><h3>Confirmamos stock</h3><p>Te confirmamos el precio final, la disponibilidad y el plazo estimado antes de cerrar la compra.</p></article>
+        <article><div class="number">03 / COORDINÁ</div><h3>Pago y entrega</h3><p>Coordinamos el medio de pago y la entrega con vos por WhatsApp.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contacto">
+    <div><div class="logo">CANTO</div><p>SNEAKERS · STREETWEAR · SPORT<br>Estilo para todos los días.</p></div>
+    <a class="social whatsapp-general" href="#">CONTACTANOS POR WHATSAPP ↗</a>
+  </footer>
+
+  <script>
+    // FILTROS DEL CATÁLOGO
+    const filters = document.querySelectorAll('.filter');
+    const products = document.querySelectorAll('.product');
+    filters.forEach(button => button.addEventListener('click', () => {
+      filters.forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      const category = button.dataset.filter;
+      products.forEach(product => {
+        product.style.display = category === 'Todos' || product.dataset.category === category ? '' : 'none';
+      });
+    }));
+
+    // CONFIGURACIÓN: reemplazá el texto por tu WhatsApp con código de país, sin + ni espacios.
+    // Ejemplo de Argentina: 54911XXXXXXXX
+    const WHATSAPP_NUMBER = '54911XXXXXXXX';
+    function whatsappLink(message) {
+      return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message);
+    }
+    document.querySelectorAll('[data-product]').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        const product = link.dataset.product;
+        if (WHATSAPP_NUMBER.includes('X')) {
+          alert('La tienda todavía está en preparación. Primero hay que configurar el número de WhatsApp.');
+          return;
+        }
+        window.location.href = whatsappLink('Hola CANTO, quiero consultar por ' + product + '. ¿Me pasan precio, talles y disponibilidad?');
+      });
+    });
+    document.querySelectorAll('.whatsapp-general').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        if (WHATSAPP_NUMBER.includes('X')) {
+          alert('La tienda todavía está en preparación. Primero hay que configurar el número de WhatsApp.');
+          return;
+        }
+        window.location.href = whatsappLink('Hola CANTO, quiero consultar por las zapatillas disponibles.');
+      });
+    });
+  </script>
+</body>
+</html>
