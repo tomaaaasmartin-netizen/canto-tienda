@@ -346,6 +346,236 @@ Promise.all([
     '<div class="empty">No se pudo cargar el catálogo. Revisá la conexión e intentá nuevamente.</div>';
 });
 
+/* ===== CANTO: SELECTOR DE TALLES ===== */
+
+let cantoProductoSeleccionado = null;
+let cantoTalleSeleccionado = null;
+let cantoCarrito = [];
+
+function cantoAbrirSelector(productoId) {
+  const producto = allProducts.find(
+    p => String(p.id) === String(productoId)
+  );
+
+  if (!producto) {
+    alert('No se encontró el producto.');
+    return;
+  }
+
+  cantoProductoSeleccionado = producto;
+  cantoTalleSeleccionado = null;
+
+  let modal = document.getElementById('cantoTalleModal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'cantoTalleModal';
+
+    modal.style.cssText = `
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,.65);
+      display:flex; align-items:center;
+      justify-content:center; padding:20px;
+    `;
+
+    modal.innerHTML = `
+      <div style="
+        background:#fffdf9; color:#222;
+        width:100%; max-width:380px;
+        padding:25px; border-radius:16px;
+        font-family:inherit; text-align:center;
+      ">
+        <button id="cantoCerrarTalles" type="button"
+          style="float:right;border:0;background:none;font-size:24px">
+          ×
+        </button>
+
+        <h2 id="cantoNombreProducto">Elegí tu talle</h2>
+        <p id="cantoPrecioProducto"></p>
+
+        <div id="cantoListaTalles" style="
+          display:flex; flex-wrap:wrap;
+          justify-content:center; gap:10px;
+          margin:22px 0;
+        "></div>
+
+        <button id="cantoAgregarCarrito" type="button"
+          style="
+            width:100%; padding:14px;
+            background:#222; color:white;
+            border:0; border-radius:8px;
+            font-size:15px; cursor:pointer;
+          ">
+          Añadir al carrito
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#cantoCerrarTalles')
+      .addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+    modal.addEventListener('click', event => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    modal.querySelector('#cantoAgregarCarrito')
+      .addEventListener('click', () => {
+        if (cantoTalleSeleccionado === null) {
+          alert('Primero elegí un talle.');
+          return;
+        }
+
+        const p = cantoProductoSeleccionado;
+        const precio = Math.round(Number(p.precioLista) * 0.85);
+
+        const existente = cantoCarrito.find(item =>
+          String(item.id) === String(p.id) &&
+          item.talle === cantoTalleSeleccionado
+        );
+
+        if (existente) {
+          existente.cantidad++;
+        } else {
+          cantoCarrito.push({
+            id: p.id,
+            marca: p.marca,
+            modelo: p.modelo,
+            talle: cantoTalleSeleccionado,
+            precio: precio,
+            cantidad: 1
+          });
+        }
+
+        modal.style.display = 'none';
+        cantoMostrarCarrito();
+      });
+  }
+
+  modal.querySelector('#cantoNombreProducto').textContent =
+    producto.marca + ' ' + producto.modelo;
+
+  modal.querySelector('#cantoPrecioProducto').textContent =
+    'Precio: ' + money(Math.round(Number(producto.precioLista) * 0.85));
+
+  const lista = modal.querySelector('#cantoListaTalles');
+  const talles = Array.isArray(producto.talles)
+    ? producto.talles
+    : [];
+
+  lista.innerHTML = '';
+
+  if (!talles.length) {
+    lista.textContent = 'No hay talles disponibles.';
+  }
+
+  talles.forEach(talle => {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.textContent = talle;
+
+    boton.style.cssText = `
+      min-width:55px; padding:12px;
+      border:1px solid #aaa; border-radius:8px;
+      background:white; color:#222; cursor:pointer;
+    `;
+
+    boton.addEventListener('click', () => {
+      cantoTalleSeleccionado = talle;
+
+      lista.querySelectorAll('button').forEach(botonTalle => {
+        botonTalle.style.background = 'white';
+        botonTalle.style.color = '#222';
+        botonTalle.style.borderColor = '#aaa';
+      });
+
+      boton.style.background = '#222';
+      boton.style.color = 'white';
+      boton.style.borderColor = '#222';
+    });
+
+    lista.appendChild(boton);
+  });
+
+  modal.style.display = 'flex';
+}
+
+function cantoMostrarCarrito() {
+  let panel = document.getElementById('cantoCarritoPanel');
+
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'cantoCarritoPanel';
+
+    panel.style.cssText = `
+      position:fixed; bottom:18px; right:18px;
+      z-index:9998; background:#222; color:white;
+      padding:15px 18px; border-radius:12px;
+      box-shadow:0 4px 18px #0003;
+      max-width:calc(100vw - 36px);
+      font-family:inherit;
+    `;
+
+    document.body.appendChild(panel);
+  }
+
+  const unidades = cantoCarrito.reduce(
+    (total, item) => total + item.cantidad, 0
+  );
+
+  const total = cantoCarrito.reduce(
+    (suma, item) => suma + item.precio * item.cantidad, 0
+  );
+
+  panel.innerHTML = `
+    <button id="cantoVerCarrito" type="button"
+      style="background:none;color:white;border:0;cursor:pointer;font-size:15px">
+      🛒 Carrito (${unidades}) · ${money(total)}
+    </button>
+    <div id="cantoDetalleCarrito" style="display:none;margin-top:12px">
+      ${cantoCarrito.map((item, i) => `
+        <div style="padding:8px 0;border-top:1px solid #666">
+          <strong>${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</strong>
+          <div>Talle: ${escapeHtml(String(item.talle))}</div>
+          <div>${money(item.precio)} × ${item.cantidad}</div>
+          <button type="button" data-quitar="${i}"
+            style="margin-top:5px;padding:5px 9px;cursor:pointer">
+            Quitar
+          </button>
+        </div>
+      `).join('')}
+      <strong>Total: ${money(total)}</strong>
+    </div>
+  `;
+
+  panel.querySelector('#cantoVerCarrito')
+    .addEventListener('click', () => {
+      const detalle = panel.querySelector('#cantoDetalleCarrito');
+      detalle.style.display =
+        detalle.style.display === 'none' ? 'block' : 'none';
+    });
+
+  panel.querySelectorAll('[data-quitar]').forEach(boton => {
+    boton.addEventListener('click', () => {
+      cantoCarrito.splice(Number(boton.dataset.quitar), 1);
+      cantoMostrarCarrito();
+    });
+  });
+}
+
+document.addEventListener('click', event => {
+  const boton = event.target.closest('.choose-size');
+  if (!boton) return;
+
+  event.preventDefault();
+  cantoAbrirSelector(boton.dataset.productId);
+});
+
   </script>
 </body>
 </html>
