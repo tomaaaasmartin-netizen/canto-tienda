@@ -119,6 +119,100 @@
   font-weight: 700;
 }
   
+/* FICHA DE PRODUCTO CANTO */
+.canto-product-detail {
+  display: none;
+  max-width: 1100px;
+  margin: 25px auto;
+  padding: 20px;
+  color: #222;
+}
+
+.canto-product-detail.active {
+  display: block;
+}
+
+.canto-detail-back {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #222;
+  cursor: pointer;
+}
+
+.canto-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.canto-detail-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: #f7f7f5;
+  border-radius: 12px;
+}
+
+.canto-detail-name {
+  font-size: 27px;
+  margin: 8px 0 16px;
+}
+
+.canto-detail-description {
+  line-height: 1.7;
+  color: #555;
+}
+
+.canto-detail-specs {
+  margin-top: 24px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.canto-detail-specs p {
+  line-height: 1.6;
+}
+
+.canto-detail-price {
+  font-size: 25px;
+  font-weight: 700;
+  margin: 15px 0;
+}
+
+.canto-detail-old-price {
+  color: #888;
+  font-size: 16px;
+  text-decoration: line-through;
+  margin-right: 8px;
+}
+
+.canto-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 700px) {
+  .canto-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .canto-detail-name {
+    font-size: 23px;
+  }
+
+  .canto-product-detail {
+    padding: 14px;
+  }
+}
+
   </style>
   
 <script>
@@ -166,6 +260,50 @@
 </header>
 
   <main>
+    
+<section id="cantoFichaProducto" class="canto-product-detail">
+  <button
+    type="button"
+    class="canto-detail-back"
+    onclick="cantoVolverCatalogo()">
+    ← Volver al catálogo
+  </button>
+
+  <div class="canto-detail-layout">
+    <div>
+      <img
+        id="cantoFichaImagen"
+        class="canto-detail-image"
+        src=""
+        alt="Zapatilla CANTO">
+    </div>
+
+    <div>
+      <p id="cantoFichaMarca"></p>
+      <h1 id="cantoFichaNombre" class="canto-detail-name"></h1>
+
+      <div id="cantoFichaPrecio" class="canto-detail-price"></div>
+
+      <p id="cantoFichaColores" class="canto-detail-description"></p>
+
+      <button
+        type="button"
+        class="order"
+        id="cantoFichaElegirTalle">
+        Elegir talle
+      </button>
+
+      <div class="canto-detail-specs">
+        <h3>Características y tecnología</h3>
+        <p id="cantoFichaDescripcion">
+          Estamos preparando la información de este modelo.
+        </p>
+        <div id="cantoFichaEspecificaciones"></div>
+      </div>
+    </div>
+  </div>
+</section>
+    
     <section class="hero">
       <div class="hero-copy">
         <div class="eyebrow">Sneakers · Streetwear · Sport</div>
@@ -225,6 +363,88 @@
       return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message);
     }
 
+function cantoAbrirFicha(productoId) {
+  const producto = allProducts.find(
+    p => String(p.id) === String(productoId)
+  );
+
+  if (!producto) return;
+
+  const catalogo = document.getElementById('catalogo');
+  const ficha = document.getElementById('cantoFichaProducto');
+
+  document.getElementById('cantoFichaMarca').textContent =
+    producto.marca || 'CANTO';
+
+  document.getElementById('cantoFichaNombre').textContent =
+    producto.modelo || 'Zapatilla';
+
+  document.getElementById('cantoFichaImagen').src =
+    producto.foto || '';
+
+  document.getElementById('cantoFichaImagen').alt =
+    `${producto.marca || ''} ${producto.modelo || ''}`;
+
+  const precioOriginal = Number(producto.precioLista);
+  const precioOferta = Math.round(precioOriginal * 0.85);
+
+  document.getElementById('cantoFichaPrecio').innerHTML =
+    `<span class="canto-detail-old-price">${money(precioOriginal)}</span>
+     ${money(precioOferta)}`;
+
+  const colores = Array.isArray(producto.colores) &&
+    producto.colores.length
+    ? producto.colores.join(', ')
+    : 'Consultar colores';
+
+  document.getElementById('cantoFichaColores').textContent =
+    `Colores: ${colores}`;
+
+  document.getElementById('cantoFichaDescripcion').textContent =
+    producto.descripcion ||
+    'Consultá las características específicas de este modelo.';
+
+  const especificaciones =
+    document.getElementById('cantoFichaEspecificaciones');
+
+  especificaciones.replaceChildren();
+
+  const datos = [
+    ['Código', producto.codigo],
+    ['Categoría', producto.categoria],
+    ['Género', producto.genero],
+    ['Tecnología', producto.tecnologia],
+    ['Materiales', producto.materiales],
+    ['Tipo de suela', producto.suela],
+    ['Actividad recomendada', producto.uso]
+  ];
+
+  datos.forEach(([titulo, valor]) => {
+    if (!valor) return;
+
+    const parrafo = document.createElement('p');
+    parrafo.textContent = `${titulo}: ${valor}`;
+    especificaciones.appendChild(parrafo);
+  });
+
+  document.getElementById('cantoFichaElegirTalle')
+    .onclick = () => cantoAbrirSelector(producto.id);
+
+  catalogo.style.display = 'none';
+  ficha.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cantoVolverCatalogo() {
+  document.getElementById('cantoFichaProducto')
+    .classList.remove('active');
+
+  document.getElementById('catalogo').style.display = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
     function renderProducts() {
   const container = document.getElementById('products');
   const brand = document.getElementById('brandFilter').value;
@@ -251,14 +471,18 @@
       : 'Consultar colores';
 
     return `
-      <article class="product">
-        <div class="product-image">
+      <article class="product" data-product-id="${escapeAttr(String(p.id))}">
+        <div class="product-image"
+     onclick="cantoAbrirFicha('${escapeAttr(String(p.id))}')"
+     style="cursor:pointer">
           ${image}
           <span class="tag">${escapeHtml(p.categoria || 'CALZADO')}</span>
         </div>
 
         <div class="product-info">
-          <p class="product-name">
+          <p class="product-name"
+   onclick="cantoAbrirFicha('${escapeAttr(String(p.id))}')"
+   style="cursor:pointer">
             ${escapeHtml(p.marca)} ${escapeHtml(p.modelo)}
           </p>
 
