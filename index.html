@@ -99,6 +99,26 @@
   color: white;
   border-color: #607a72;
 }
+  
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#cantoBotonCarrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+#cantoContadorHeader {
+  font-size: 12px;
+  font-weight: 700;
+}
+  
   </style>
   
 <script>
@@ -114,12 +134,37 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <body>
-  <div class="topline">CANTO — TU PRÓXIMO PAR EMPIEZA ACÁ</div>
-  <header>
-    <a class="logo" href="#" aria-label="CANTO inicio">CANTO</a>
-    <nav><a href="#catalogo">Zapatillas</a><a href="#como-comprar">Cómo comprar</a><a href="#contacto">Contacto</a></nav>
-    <button class="menu" aria-label="Ir al catálogo" onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})">☰</button>
-  </header>
+  
+<div class="topline">CANTO — TU PRÓXIMO PAR EMPIEZA ACÁ</div>
+
+<header>
+  <a class="logo" href="#" aria-label="CANTO inicio">CANTO</a>
+
+  <nav>
+    <a href="#catalogo">Zapatillas</a>
+    <a href="#como-comprar">Cómo comprar</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+
+  <div class="header-actions">
+    <button
+      type="button"
+      id="cantoBotonCarrito"
+      class="menu"
+      aria-label="Abrir carrito"
+      onclick="cantoAlternarCarrito()">
+      🛒 <span id="cantoContadorHeader">0</span>
+    </button>
+
+    <button
+      class="menu"
+      aria-label="Ir al catálogo"
+      onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})">
+      ☰
+    </button>
+  </div>
+</header>
+
   <main>
     <section class="hero">
       <div class="hero-copy">
@@ -505,24 +550,44 @@ function cantoAbrirSelector(productoId) {
   modal.style.display = 'flex';
 }
 
+
+function cantoAlternarCarrito() {
+  const panel = document.getElementById('cantoCarritoPanel');
+
+  if (panel && panel.style.display === 'block') {
+    panel.style.display = 'none';
+  } else {
+    cantoMostrarCarrito();
+  }
+}
+
 function cantoMostrarCarrito() {
   let panel = document.getElementById('cantoCarritoPanel');
 
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'cantoCarritoPanel';
-
-    panel.style.cssText = `
-      position:fixed; bottom:18px; right:18px;
-      z-index:9998; background:#222; color:white;
-      padding:15px 18px; border-radius:12px;
-      box-shadow:0 4px 18px #0003;
-      max-width:calc(100vw - 36px);
-      font-family:inherit;
-    `;
-
     document.body.appendChild(panel);
   }
+
+  panel.style.cssText = `
+    position:fixed;
+    top:85px;
+    bottom:auto;
+    right:15px;
+    z-index:9998;
+    background:#222;
+    color:white;
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 4px 18px #0003;
+    width:300px;
+    max-width:calc(100vw - 30px);
+    max-height:70vh;
+    overflow-y:auto;
+    font-family:inherit;
+    display:block;
+  `;
 
   const unidades = cantoCarrito.reduce(
     (total, item) => total + item.cantidad, 0
@@ -532,32 +597,42 @@ function cantoMostrarCarrito() {
     (suma, item) => suma + item.precio * item.cantidad, 0
   );
 
+  const contador = document.getElementById('cantoContadorHeader');
+  if (contador) contador.textContent = unidades;
+
   panel.innerHTML = `
-    <button id="cantoVerCarrito" type="button"
-      style="background:none;color:white;border:0;cursor:pointer;font-size:15px">
-      🛒 Carrito (${unidades}) · ${money(total)}
-    </button>
-    <div id="cantoDetalleCarrito" style="display:none;margin-top:12px">
-      ${cantoCarrito.map((item, i) => `
-        <div style="padding:8px 0;border-top:1px solid #666">
-          <strong>${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</strong>
-          <div>Talle: ${escapeHtml(String(item.talle))}</div>
-          <div>${money(item.precio)} × ${item.cantidad}</div>
-          <button type="button" data-quitar="${i}"
-            style="margin-top:5px;padding:5px 9px;cursor:pointer">
-            Quitar
-          </button>
-        </div>
-      `).join('')}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <strong style="font-size:18px">Mi carrito (${unidades})</strong>
+      <button id="cantoCerrarCarrito" type="button"
+        style="background:none;color:white;border:0;font-size:24px;cursor:pointer">
+        ×
+      </button>
+    </div>
+
+    ${
+      cantoCarrito.length
+        ? cantoCarrito.map((item, i) => `
+          <div style="padding:12px 0;border-top:1px solid #666">
+            <strong>${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</strong>
+            <div>Talle: ${escapeHtml(String(item.talle))}</div>
+            <div>${money(item.precio)} × ${item.cantidad}</div>
+            <button type="button" data-quitar="${i}"
+              style="margin-top:8px;padding:6px 10px;cursor:pointer">
+              Quitar
+            </button>
+          </div>
+        `).join('')
+        : '<p>Tu carrito está vacío.</p>'
+    }
+
+    <div style="border-top:1px solid #666;padding-top:12px">
       <strong>Total: ${money(total)}</strong>
     </div>
   `;
 
-  panel.querySelector('#cantoVerCarrito')
+  panel.querySelector('#cantoCerrarCarrito')
     .addEventListener('click', () => {
-      const detalle = panel.querySelector('#cantoDetalleCarrito');
-      detalle.style.display =
-        detalle.style.display === 'none' ? 'block' : 'none';
+      panel.style.display = 'none';
     });
 
   panel.querySelectorAll('[data-quitar]').forEach(boton => {
@@ -567,6 +642,7 @@ function cantoMostrarCarrito() {
     });
   });
 }
+
 
 document.addEventListener('click', event => {
   const boton = event.target.closest('.choose-size');
