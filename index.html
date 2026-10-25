@@ -225,55 +225,78 @@
   CANTO_SUPABASE_KEY
 );
 
-supabaseClient
-  .from('productos')
-  .select('id, marca, codigo, nombre, precio_lista, precio_venta, foto, activo')
-  .eq('activo', true)
-  .order('nombre')
-  .then(({ data, error }) => {
-    if (error) throw error;
 
-    allProducts = (data || [])
-      .filter(p =>
-        p.marca &&
-        p.nombre &&
-        Number(p.precio_lista) > 0 &&
-        p.foto
-      )
-      .map(p => ({
-        marca: p.marca,
-        modelo: p.nombre,
-        precioLista: Number(p.precio_lista),
-        precioVenta: Number(p.precio_venta),
-        foto: p.foto,
-        categoria: 'Deportiva',
-        genero: 'Unisex',
-        talles: [],
-        colores: [],
-        disponible: false,
-        sinDescuento: true
-      }));
+Promise.all([
+  supabaseClient
+    .from('productos')
+    .select('id, marca, codigo, nombre, precio_lista, precio_venta, foto, activo')
+    .eq('activo', true)
+    .order('nombre'),
 
-    const brands = [...new Set(allProducts.map(p => p.marca))].sort();
-    const select = document.getElementById('brandFilter');
+  supabaseClient
+    .from('talles')
+    .select('producto_id, talle, disponible')
+    .eq('disponible', true)
+])
+.then(([productosResult, tallesResult]) => {
+  if (productosResult.error) throw productosResult.error;
+  if (tallesResult.error) throw tallesResult.error;
 
-    select.querySelectorAll('option:not(:first-child)')
-      .forEach(option => option.remove());
+  const tallesPorProducto = {};
 
-    brands.forEach(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      option.textContent = name;
-      select.appendChild(option);
-    });
+  (tallesResult.data || []).forEach(t => {
+    const id = String(t.producto_id);
 
-    renderProducts();
-  })
-  .catch(error => {
-    console.error('Error cargando productos:', error);
-    document.getElementById('products').innerHTML =
-      '<div class="empty">No se pudo cargar el catálogo. Intentá nuevamente más tarde.</div>';
+    if (!tallesPorProducto[id]) {
+      tallesPorProducto[id] = [];
+    }
+
+    tallesPorProducto[id].push(String(t.talle).replace('.', ','));
   });
+
+  allProducts = (productosResult.data || [])
+    .filter(p =>
+      p.marca &&
+      p.nombre &&
+      Number(p.precio_lista) > 0 &&
+      p.foto
+    )
+    .map(p => ({
+      id: p.id,
+      marca: p.marca,
+      modelo: p.nombre,
+      precioLista: Number(p.precio_lista),
+      precioVenta: Number(p.precio_venta),
+      foto: p.foto,
+      categoria: 'Deportiva',
+      genero: 'Unisex',
+      talles: tallesPorProducto[String(p.id)] || [],
+      colores: [],
+      disponible: (tallesPorProducto[String(p.id)] || []).length > 0,
+      sinDescuento: true
+    }));
+
+  const brands = [...new Set(allProducts.map(p => p.marca))].sort();
+  const select = document.getElementById('brandFilter');
+
+  select.querySelectorAll('option:not(:first-child)')
+    .forEach(option => option.remove());
+
+  brands.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+
+  renderProducts();
+})
+.catch(error => {
+  console.error('Error cargando productos y talles:', error);
+  document.getElementById('products').innerHTML =
+    '<div class="empty">No se pudo cargar el catálogo. Revisá la conexión e intentá nuevamente.</div>';
+});
+
   </script>
 </body>
 </html>
