@@ -424,15 +424,17 @@ function cantoAbrirFicha(productoId) {
 
   especificaciones.replaceChildren();
 
-  const datos = [
-    ['Código', producto.codigo],
-    ['Categoría', producto.categoria],
-    ['Género', producto.genero],
-    ['Tecnología', producto.tecnologia],
-    ['Materiales', producto.materiales],
-    ['Tipo de suela', producto.suela],
-    ['Actividad recomendada', producto.uso]
-  ];
+  
+const datos = [
+  ['Código', producto.codigo],
+  ['Categoría', producto.categoria],
+  ['Género', producto.genero],
+  ['Colores', Array.isArray(producto.colores) ? producto.colores.join(', ') : ''],
+  ['Materiales', producto.materiales],
+  ['Calce', producto.calce],
+  ['Uso recomendado', producto.uso]
+];
+
 
   datos.forEach(([titulo, valor]) => {
     if (!valor) return;
