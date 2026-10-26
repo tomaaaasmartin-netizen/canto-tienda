@@ -396,11 +396,9 @@ function cantoAbrirFicha(productoId) {
     `${producto.marca || ''} ${producto.modelo || ''}`;
 
   const precioOriginal = Number(producto.precioLista);
-  const precioOferta = Math.round(precioOriginal * 0.85);
 
-  document.getElementById('cantoFichaPrecio').innerHTML =
-    `<span class="canto-detail-old-price">${money(precioOriginal)}</span>
-     ${money(precioOferta)}`;
+  document.getElementById('cantoFichaPrecio').textContent =
+  money(precioOriginal);
 
   const colores = Array.isArray(producto.colores) &&
     producto.colores.length
@@ -471,7 +469,7 @@ function cantoVolverCatalogo() {
   }
 
   container.innerHTML = shown.map(p => {
-    const salePrice = Math.round(Number(p.precioLista) * 0.85);
+    const salePrice = Number(p.precioLista);
     const image = p.foto
       ? `<img src="${escapeAttr(p.foto)}" alt="${escapeAttr(p.marca + ' ' + p.modelo)}" loading="lazy">`
       : '';
@@ -501,9 +499,8 @@ function cantoVolverCatalogo() {
           </div>
 
           <div class="price">
-            <span class="old-price">${money(Number(p.precioLista))}</span>
-            ${money(salePrice)}
-          </div>
+  ${money(salePrice)}
+</div>
 
           <button
             type="button"
@@ -557,7 +554,7 @@ function cantoVolverCatalogo() {
 Promise.all([
   supabaseClient
     .from('productos')
-    .select('id, marca, codigo, nombre, precio_lista, precio_venta, foto, activo')
+    .select('id, marca, codigo, nombre, precio_lista, precio_venta, foto, activo, categoria, genero, colores, descripcion, materiales, calce, uso')
     .eq('activo', true)
     .order('nombre'),
 
@@ -711,8 +708,7 @@ function cantoAbrirSelector(productoId) {
         }
 
         const p = cantoProductoSeleccionado;
-        const precio = Math.round(Number(p.precioLista) * 0.85);
-
+const precio = Number(p.precioLista);
         const existente = cantoCarrito.find(item =>
           String(item.id) === String(p.id) &&
           item.talle === cantoTalleSeleccionado
@@ -740,7 +736,7 @@ function cantoAbrirSelector(productoId) {
     producto.marca + ' ' + producto.modelo;
 
   modal.querySelector('#cantoPrecioProducto').textContent =
-    'Precio: ' + money(Math.round(Number(producto.precioLista) * 0.85));
+  'Precio: ' + money(Number(producto.precioLista));
 
   const lista = modal.querySelector('#cantoListaTalles');
   const talles = Array.isArray(producto.talles)
