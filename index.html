@@ -229,15 +229,15 @@
 
 <body>
   
-<div class="topline">CANTO — TU PRÓXIMO PAR EMPIEZA ACÁ</div>
+<div class="topline">CANTO — INDUMENTARIA PARA TODOS</div>
 
 <header>
   <a class="logo" href="#" aria-label="CANTO inicio">CANTO</a>
 
   <nav>
-    <a href="#catalogo">Zapatillas</a>
-    <a href="#como-comprar">Cómo comprar</a>
-    <a href="#contacto">Contacto</a>
+  <a href="#catalogo">Indumentaria</a>
+  <a href="#como-comprar">Cómo comprar</a>
+  <a href="#contacto">Contacto</a>
   </nav>
 
   <div class="header-actions">
@@ -305,15 +305,25 @@
 </section>
     
     <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow">Sneakers · Streetwear · Sport</div>
-        <h1>CAMINÁ<br>A TU<br>MANERA.</h1>
-        <p>Estilo para todos los días. Descubrí modelos urbanos y deportivos elegidos para acompañar tu ritmo.</p>
-        <a class="cta" href="#catalogo">Ver colección</a>
-      </div>
-      <div class="hero-art" aria-label="Ilustración decorativa de una zapatilla">
-        <div class="shoe-shape"><div class="shoe-upper"></div><div class="shoe-panel"></div><div class="shoe-sole"></div></div>
-      </div>
+  <div class="hero-copy">
+    <div class="eyebrow">URBANO · BÁSICOS · SPORT</div>
+    <h1>VESTÍ<br>TU<br>ESTILO.</h1>
+    <p>
+      Indumentaria unisex para todos los días.
+      Prendas urbanas, esenciales y deportivas
+      para expresar tu manera de ser.
+    </p>
+    <a class="cta" href="#catalogo">DESCUBRÍ LA COLECCIÓN</a>
+  </div>
+
+  <div class="hero-art" aria-label="Colección de indumentaria CANTO">
+    <img
+      src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1000&q=85"
+      alt="Colección de indumentaria urbana"
+      style="width:100%;height:100%;object-fit:cover;border-radius:4px"
+      loading="eager">
+  </div>
+</section>
     </section>
     <section class="section" id="catalogo">
       <div class="section-head">
@@ -476,7 +486,7 @@ function cantoVolverCatalogo() {
      onclick="cantoAbrirFicha('${escapeAttr(String(p.id))}')"
      style="cursor:pointer">
           ${image}
-          <span class="tag">${escapeHtml(p.categoria || 'CALZADO')}</span>
+          <span class="tag">${escapeHtml(p.categoria || 'INDUMENTARIA')}</span>
         </div>
 
         <div class="product-info">
