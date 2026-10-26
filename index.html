@@ -330,12 +330,17 @@
         <div><div class="eyebrow" style="color:#777">Elegí tu próximo par</div><h2>LA COLECCIÓN</h2></div>
         <p>Consultá disponibilidad de talle y color.</p>
       </div>
-      <div class="filters" aria-label="Filtrar productos">
-        <button class="filter active" data-filter="Todos">Todos</button>
-        <button class="filter" data-filter="Urbana">Urbanas</button>
-        <button class="filter" data-filter="Deportiva">Deportivas</button>
-        <button class="filter" data-filter="Clásica">Clásicas</button>
-      </div>
+     
+<div class="filters" aria-label="Filtrar productos">
+  <button class="filter active" data-filter="Todos">Todas</button>
+  <button class="filter" data-filter="Remeras">Remeras</button>
+  <button class="filter" data-filter="Buzos">Buzos</button>
+  <button class="filter" data-filter="Pantalones">Pantalones</button>
+  <button class="filter" data-filter="Camperas">Camperas</button>
+  <button class="filter" data-filter="Shorts">Shorts</button>
+  <button class="filter" data-filter="Accesorios">Accesorios</button>
+</div>
+
       <label for="brandFilter" style="display:block;font-size:11px;margin-bottom:7px;text-transform:uppercase;letter-spacing:1px">Filtrar por marca</label>
       <select id="brandFilter" class="filter-select"><option value="Todas">Todas las marcas</option></select>
       <div class="products" id="products"><div class="empty">Estamos preparando el catálogo de CANTO.<br>Pronto vas a encontrar acá los modelos disponibles.</div></div>
@@ -586,20 +591,27 @@ Promise.all([
       Number(p.precio_lista) > 0 &&
       p.foto
     )
-    .map(p => ({
-      id: p.id,
-      marca: p.marca,
-      modelo: p.nombre,
-      precioLista: Number(p.precio_lista),
-      precioVenta: Number(p.precio_venta),
-      foto: p.foto,
-      categoria: 'Deportiva',
-      genero: 'Unisex',
-      talles: tallesPorProducto[String(p.id)] || [],
-      colores: [],
-      disponible: (tallesPorProducto[String(p.id)] || []).length > 0,
-      sinDescuento: true
-    }));
+    
+.map(p => ({
+  id: p.id,
+  marca: p.marca,
+  codigo: p.codigo,
+  modelo: p.nombre,
+  precioLista: Number(p.precio_lista),
+  precioVenta: Number(p.precio_lista),
+  foto: p.foto,
+  categoria: p.categoria || 'Indumentaria',
+  genero: p.genero || 'Unisex',
+  talles: tallesPorProducto[String(p.id)] || [],
+  colores: Array.isArray(p.colores) ? p.colores : [],
+  descripcion: p.descripcion || '',
+  materiales: p.materiales || '',
+  calce: p.calce || '',
+  uso: p.uso || '',
+  disponible: (tallesPorProducto[String(p.id)] || []).length > 0,
+  sinDescuento: true
+}));
+
 
   const brands = [...new Set(allProducts.map(p => p.marca))].sort();
   const select = document.getElementById('brandFilter');
