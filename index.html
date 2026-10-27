@@ -580,15 +580,24 @@ botonAgregarFicha.onclick = () => {
   cantoMostrarCarrito();
 };
 
+    document.querySelector('main > .hero').style.display = 'none';
+  document.querySelector('main > .banner').style.display = 'none';
+  document.querySelector('main > #como-comprar').style.display = 'none';
+  document.querySelector('footer').style.display = 'none';
+
   catalogo.style.display = 'none';
   ficha.classList.add('active');
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 function cantoVolverCatalogo() {
   document.getElementById('cantoFichaProducto')
     .classList.remove('active');
+
+  document.querySelector('main > .hero').style.display = '';
+  document.querySelector('main > .banner').style.display = '';
+  document.querySelector('main > #como-comprar').style.display = '';
+  document.querySelector('footer').style.display = '';
 
   document.getElementById('catalogo').style.display = '';
 
