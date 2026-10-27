@@ -563,12 +563,34 @@ function cantoVolverCatalogo() {
   ${money(salePrice)}
 </div>
 
-          <button
-            type="button"
-            class="order choose-size"
-            data-product-id="${escapeAttr(String(p.id))}">
-            Elegir talle
-          </button>
+          
+<div class="canto-talles-tarjeta" data-product-id="${escapeAttr(String(p.id))}">
+  <p style="margin:12px 0 8px;font-size:13px;font-weight:600;">
+    Talles disponibles
+  </p>
+
+  <div class="canto-talles-opciones"
+       style="display:flex;flex-wrap:wrap;gap:7px;">
+    ${(Array.isArray(p.talles) ? p.talles : []).map(talle => `
+      <button
+        type="button"
+        class="canto-talle-inline"
+        data-talle="${escapeAttr(String(talle))}"
+        style="padding:9px 12px;border:1px solid #aaa;border-radius:7px;background:white;color:#222;cursor:pointer;">
+        ${escapeHtml(String(talle))}
+      </button>
+    `).join('')}
+  </div>
+
+  <button
+    type="button"
+    class="order canto-agregar-inline"
+    data-product-id="${escapeAttr(String(p.id))}"
+    style="margin-top:12px;">
+    Agregar al carrito
+  </button>
+</div>
+
 
           <a class="order"
             href="${WHATSAPP_NUMBER.includes('X')
@@ -942,13 +964,81 @@ function cantoMostrarCarrito() {
 }
 
 
-document.addEventListener('click', event => {
-  const boton = event.target.closest('.choose-size');
-  if (!boton) return;
 
-  event.preventDefault();
-  cantoAbrirSelector(boton.dataset.productId);
+document.addEventListener('click', event => {
+  // Seleccionar un talle directamente en la tarjeta
+  const botonTalle = event.target.closest('.canto-talle-inline');
+
+  if (botonTalle) {
+    const tarjeta = botonTalle.closest('.canto-talles-tarjeta');
+
+    tarjeta.dataset.talleSeleccionado = botonTalle.dataset.talle;
+
+    tarjeta.querySelectorAll('.canto-talle-inline').forEach(boton => {
+      boton.style.background = 'white';
+      boton.style.color = '#222';
+      boton.style.borderColor = '#aaa';
+    });
+
+    botonTalle.style.background = '#222';
+    botonTalle.style.color = 'white';
+    botonTalle.style.borderColor = '#222';
+
+    return;
+  }
+
+  // Agregar al carrito desde la tarjeta
+  const botonAgregar = event.target.closest('.canto-agregar-inline');
+
+  if (botonAgregar) {
+    const producto = allProducts.find(
+      p => String(p.id) === String(botonAgregar.dataset.productId)
+    );
+
+    const tarjeta = botonAgregar.closest('.canto-talles-tarjeta');
+    const talle = tarjeta.dataset.talleSeleccionado;
+
+    if (!talle) {
+      alert('Primero elegí un talle.');
+      return;
+    }
+
+    if (!producto) {
+      alert('No se encontró el producto.');
+      return;
+    }
+
+    const existente = cantoCarrito.find(item =>
+      String(item.id) === String(producto.id) &&
+      String(item.talle) === String(talle)
+    );
+
+    if (existente) {
+      existente.cantidad++;
+    } else {
+      cantoCarrito.push({
+        id: producto.id,
+        marca: producto.marca,
+        modelo: producto.modelo,
+        talle: talle,
+        precio: Number(producto.precioLista),
+        cantidad: 1
+      });
+    }
+
+    cantoMostrarCarrito();
+    return;
+  }
+
+  // Mantener el selector anterior donde todavía se utiliza
+  const boton = event.target.closest('.choose-size');
+
+  if (boton) {
+    event.preventDefault();
+    cantoAbrirSelector(boton.dataset.productId);
+  }
 });
+
 
   </script>
 </body>
