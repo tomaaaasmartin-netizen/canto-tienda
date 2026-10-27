@@ -340,12 +340,25 @@
 
       <p id="cantoFichaColores" class="canto-detail-description"></p>
 
-      <button
-        type="button"
-        class="order"
-        id="cantoFichaElegirTalle">
-        Elegir talle
-      </button>
+      
+<div style="margin:20px 0;">
+  <h3 style="font-size:15px;margin-bottom:10px;">
+    Elegí tu talle
+  </h3>
+
+  <div id="cantoFichaTalles"
+       style="display:flex;flex-wrap:wrap;gap:9px;">
+  </div>
+
+  <button
+    type="button"
+    class="order"
+    id="cantoFichaAgregarCarrito"
+    style="width:100%;background:#111;color:#fff;">
+    Agregar al carrito
+  </button>
+</div>
+
 
       <div class="canto-detail-specs">
         <h3>Detalles de la prenda</h3>
@@ -496,8 +509,76 @@ const datos = [
     especificaciones.appendChild(parrafo);
   });
 
-  document.getElementById('cantoFichaElegirTalle')
-    .onclick = () => cantoAbrirSelector(producto.id);
+  
+const listaTallesFicha = document.getElementById('cantoFichaTalles');
+listaTallesFicha.innerHTML = '';
+
+let talleFichaSeleccionado = null;
+
+if (Array.isArray(producto.talles) && producto.talles.length) {
+  producto.talles.forEach(talle => {
+    const botonTalle = document.createElement('button');
+    botonTalle.type = 'button';
+    botonTalle.textContent = talle;
+
+    botonTalle.style.cssText = `
+      padding: 11px 15px;
+      border: 1px solid #aaa;
+      border-radius: 7px;
+      background: white;
+      color: #222;
+      cursor: pointer;
+    `;
+
+    botonTalle.addEventListener('click', () => {
+      talleFichaSeleccionado = talle;
+
+      listaTallesFicha.querySelectorAll('button').forEach(boton => {
+        boton.style.background = 'white';
+        boton.style.color = '#222';
+        boton.style.borderColor = '#aaa';
+      });
+
+      botonTalle.style.background = '#222';
+      botonTalle.style.color = 'white';
+      botonTalle.style.borderColor = '#222';
+    });
+
+    listaTallesFicha.appendChild(botonTalle);
+  });
+} else {
+  listaTallesFicha.textContent = 'No hay talles disponibles.';
+}
+
+
+const botonAgregarFicha = document.getElementById('cantoFichaAgregarCarrito');
+
+botonAgregarFicha.onclick = () => {
+  if (!talleFichaSeleccionado) {
+    alert('Primero elegí un talle.');
+    return;
+  }
+
+  const existente = cantoCarrito.find(item =>
+    String(item.id) === String(producto.id) &&
+    String(item.talle) === String(talleFichaSeleccionado)
+  );
+
+  if (existente) {
+    existente.cantidad++;
+  } else {
+    cantoCarrito.push({
+      id: producto.id,
+      marca: producto.marca,
+      modelo: producto.modelo,
+      talle: talleFichaSeleccionado,
+      precio: Number(producto.precioLista),
+      cantidad: 1
+    });
+  }
+
+  cantoMostrarCarrito();
+};
 
   catalogo.style.display = 'none';
   ficha.classList.add('active');
@@ -566,31 +647,6 @@ function cantoVolverCatalogo() {
           
 <div class="canto-talles-tarjeta" data-product-id="${escapeAttr(String(p.id))}">
   <p style="margin:12px 0 8px;font-size:13px;font-weight:600;">
-    Talles disponibles
-  </p>
-
-  <div class="canto-talles-opciones"
-       style="display:flex;flex-wrap:wrap;gap:7px;">
-    ${(Array.isArray(p.talles) ? p.talles : []).map(talle => `
-      <button
-        type="button"
-        class="canto-talle-inline"
-        data-talle="${escapeAttr(String(talle))}"
-        style="padding:9px 12px;border:1px solid #aaa;border-radius:7px;background:white;color:#222;cursor:pointer;">
-        ${escapeHtml(String(talle))}
-      </button>
-    `).join('')}
-  </div>
-
-  <button
-    type="button"
-    class="order canto-agregar-inline"
-    data-product-id="${escapeAttr(String(p.id))}"
-    style="margin-top:12px;">
-    Agregar al carrito
-  </button>
-</div>
-
 
           <a class="order"
             href="${WHATSAPP_NUMBER.includes('X')
