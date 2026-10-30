@@ -559,12 +559,26 @@ botonAgregarFicha.onclick = () => {
     return;
   }
 
+  const stockDisponible = Number(
+    producto.stockPorTalle?.[talleFichaSeleccionado] || 0
+  );
+
+  if (stockDisponible <= 0) {
+    alert('Este talle está agotado.');
+    return;
+  }
+
   const existente = cantoCarrito.find(item =>
     String(item.id) === String(producto.id) &&
     String(item.talle) === String(talleFichaSeleccionado)
   );
 
   if (existente) {
+    if (existente.cantidad >= stockDisponible) {
+      alert('No hay más unidades disponibles de este talle.');
+      return;
+    }
+
     existente.cantidad++;
   } else {
     cantoCarrito.push({
@@ -573,7 +587,8 @@ botonAgregarFicha.onclick = () => {
       modelo: producto.modelo,
       talle: talleFichaSeleccionado,
       precio: Number(producto.precioLista),
-      cantidad: 1
+      cantidad: 1,
+      stockDisponible: stockDisponible
     });
   }
 
