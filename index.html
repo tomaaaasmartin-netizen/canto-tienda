@@ -276,7 +276,6 @@
   const CANTO_SUPABASE_KEY =
     "sb_publishable_tHy9KdVF4w6m0gXrkojxBQ_pNY0jKhj";
 </script>
-console.log('CANTO: Supabase inicializado');
 </head>
   
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -326,10 +325,10 @@ console.log('CANTO: Supabase inicializado');
   <div class="canto-detail-layout">
     <div>
       <img
-        id="cantoFichaImagen"
-        class="canto-detail-image"
-        src=""
-        alt="Indumentaria CANTO"
+  id="cantoFichaImagen"
+  class="canto-detail-image"
+  src=""
+  alt="Indumentaria CANTO">
     </div>
 
     <div>
@@ -589,7 +588,7 @@ botonAgregarFicha.onclick = () => {
   ficha.classList.add('active');
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
-
+    }
 function cantoVolverCatalogo() {
   document.getElementById('cantoFichaProducto')
     .classList.remove('active');
