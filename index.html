@@ -768,6 +768,7 @@ console.log('Error productos:', productosResult.error);
   });
 
   renderProducts();
+  alert('Productos cargados: ' + allProducts.length);
 })
 .catch(error => {
   console.error('Error cargando productos y talles:', error);
