@@ -705,8 +705,9 @@ Promise.all([
 
   supabaseClient
     .from('talles')
-    .select('producto_id, talle, disponible')
-    .eq('disponible', true)
+.select('producto_id, talle, disponible, stock')
+.eq('disponible', true)
+.gt('stock', 0)
 ])
 .then(([productosResult, tallesResult]) => {
   if (productosResult.error) throw productosResult.error;
