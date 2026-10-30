@@ -713,17 +713,22 @@ Promise.all([
   if (productosResult.error) throw productosResult.error;
   if (tallesResult.error) throw tallesResult.error;
 
-  const tallesPorProducto = {};
+const tallesPorProducto = {};
+const stockPorTalleProducto = {};
 
-  (tallesResult.data || []).forEach(t => {
-    const id = String(t.producto_id);
+(tallesResult.data || []).forEach(t => {
+  const id = String(t.producto_id);
+  const talle = String(t.talle).replace('.', ',');
 
-    if (!tallesPorProducto[id]) {
-      tallesPorProducto[id] = [];
-    }
+  if (!tallesPorProducto[id]) {
+    tallesPorProducto[id] = [];
+    stockPorTalleProducto[id] = {};
+  }
 
-    tallesPorProducto[id].push(String(t.talle).replace('.', ','));
-  });
+  tallesPorProducto[id].push(talle);
+
+  stockPorTalleProducto[id][talle] = Number(t.stock) || 0;
+});;
 console.log('Productos recibidos:', productosResult.data);
 console.log('Error productos:', productosResult.error);
   allProducts = (productosResult.data || [])
@@ -745,6 +750,7 @@ console.log('Error productos:', productosResult.error);
   categoria: p.categoria || 'Indumentaria',
   genero: p.genero || 'Unisex',
   talles: tallesPorProducto[String(p.id)] || [],
+  stockPorTalle: stockPorTalleProducto[String(p.id)] || {},
   colores: Array.isArray(p.colores) ? p.colores : [],
   descripcion: p.descripcion || '',
   materiales: p.materiales || '',
