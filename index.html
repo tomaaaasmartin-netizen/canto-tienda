@@ -1128,7 +1128,7 @@ function cantoMostrarCarrito() {
       document.getElementById('cantoCancelarCompra')
         .addEventListener('click', () => formulario.remove());
       document.getElementById('cantoContinuarCompra')
-  .addEventListener('click', () => {
+  .addEventListener('click', async () => {
     const nombre = document.getElementById('cantoNombreCliente').value.trim();
     const telefono = document.getElementById('cantoTelefonoCliente').value.trim();
     const email = document.getElementById('cantoEmailCliente').value.trim();
@@ -1149,7 +1149,48 @@ function cantoMostrarCarrito() {
       email
     };
 
-    alert('¡Perfecto! Tus datos están completos. Seguimos con el pago.');
+    const botonContinuar = document.getElementById('cantoContinuarCompra');
+
+botonContinuar.disabled = true;
+botonContinuar.textContent = 'CONECTANDO CON MERCADO PAGO...';
+
+try {
+  const { data, error } = await supabaseClient.functions.invoke(
+    'hyper-handler',
+    {
+      body: {
+        cliente: {
+          nombre,
+          telefono,
+          email
+        },
+        items: cantoCarrito.map(item => ({
+          id: item.id,
+          talle: item.talle,
+          cantidad: item.cantidad
+        }))
+      }
+    }
+  );
+
+  if (error) throw error;
+
+  if (!data || !data.ok || !data.checkout_url) {
+    throw new Error(data?.error || 'No se pudo generar el pago.');
+  }
+
+  window.location.href = data.checkout_url;
+
+} catch (error) {
+  console.error('Error al iniciar el pago:', error);
+
+  alert(
+    'No pudimos iniciar el pago. Revisá tu conexión e intentá nuevamente.'
+  );
+
+  botonContinuar.disabled = false;
+  botonContinuar.textContent = 'CONTINUAR';
+}
   });
     });
   }
