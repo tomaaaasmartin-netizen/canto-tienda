@@ -1060,7 +1060,100 @@ function cantoMostrarCarrito() {
   });
 }
 
+  const botonFinalizar = panel.querySelector('#cantoFinalizarCompra');
 
+  if (botonFinalizar) {
+    botonFinalizar.addEventListener('click', () => {
+      let formulario = document.getElementById('cantoFormularioCompra');
+
+      if (formulario) {
+        formulario.remove();
+      }
+
+      formulario = document.createElement('div');
+      formulario.id = 'cantoFormularioCompra';
+
+      formulario.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:10000;
+        background:rgba(0,0,0,.65);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:18px;
+      `;
+
+      formulario.innerHTML = `
+        <div style="
+          background:white;
+          color:#222;
+          width:100%;
+          max-width:400px;
+          padding:24px;
+          border-radius:12px;
+        ">
+          <h2 style="margin-top:0">Datos de compra</h2>
+
+          <p>Completá tus datos para continuar.</p>
+
+          <label>Nombre completo</label>
+          <input id="cantoNombreCliente" type="text"
+            placeholder="Tu nombre"
+            style="width:100%;padding:12px;margin:7px 0 15px">
+
+          <label>Teléfono</label>
+          <input id="cantoTelefonoCliente" type="tel"
+            placeholder="Tu teléfono"
+            style="width:100%;padding:12px;margin:7px 0 15px">
+
+          <label>Correo electrónico</label>
+          <input id="cantoEmailCliente" type="email"
+            placeholder="Tu correo"
+            style="width:100%;padding:12px;margin:7px 0 20px">
+
+          <button id="cantoContinuarCompra" type="button"
+            style="width:100%;padding:14px;background:#111;color:white;border:0;border-radius:8px;font-weight:bold">
+            CONTINUAR
+          </button>
+
+          <button id="cantoCancelarCompra" type="button"
+            style="width:100%;padding:12px;margin-top:8px;background:white;border:1px solid #ccc;border-radius:8px">
+            VOLVER AL CARRITO
+          </button>
+        </div>
+      `;
+
+      document.body.appendChild(formulario);
+
+      document.getElementById('cantoCancelarCompra')
+        .addEventListener('click', () => formulario.remove());
+      document.getElementById('cantoContinuarCompra')
+  .addEventListener('click', () => {
+    const nombre = document.getElementById('cantoNombreCliente').value.trim();
+    const telefono = document.getElementById('cantoTelefonoCliente').value.trim();
+    const email = document.getElementById('cantoEmailCliente').value.trim();
+
+    if (!nombre || !telefono || !email) {
+      alert('Completá todos los datos para continuar.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Ingresá un correo electrónico válido.');
+      return;
+    }
+
+    window.cantoDatosCliente = {
+      nombre,
+      telefono,
+      email
+    };
+
+    alert('¡Perfecto! Tus datos están completos. Seguimos con el pago.');
+  });
+    });
+  }
 
 document.addEventListener('click', event => {
   // Seleccionar un talle directamente en la tarjeta
