@@ -1018,9 +1018,20 @@ function cantoMostrarCarrito() {
     ${
       cantoCarrito.length
         ? cantoCarrito.map((item, i) => `
-          <div style="padding:12px 0;border-top:1px solid #666">
-            <strong>${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</strong>
-            <div>Talle: ${escapeHtml(String(item.talle))}</div>
+          <div style="border-top:1px solid #666;padding-top:12px">
+  <strong>Total: ${money(total)}</strong>
+
+  ${
+    cantoCarrito.length
+      ? `<button
+          id="cantoFinalizarCompra"
+          type="button"
+          style="width:100%;padding:13px;margin-top:14px;background:white;color:#111;border:0;border-radius:8px;font-weight:bold;cursor:pointer">
+          FINALIZAR COMPRA
+        </button>`
+      : ''
+  }
+</div>Talle: ${escapeHtml(String(item.talle))}</div>
             <div>${money(item.precio)} × ${item.cantidad}</div>
             <button type="button" data-quitar="${i}"
               style="margin-top:8px;padding:6px 10px;cursor:pointer">
