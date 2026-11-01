@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CANTO | Administración</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f4f4;color:#171717;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:22px}
+header h1{margin:0;font-size:25px;letter-spacing:3px}
+header p{margin:7px 0 0;color:#bbb;font-size:12px}
+main{max-width:950px;margin:25px auto;padding:15px}
+.panel{background:white;border-radius:12px;padding:20px;margin-bottom:18px}
+input{width:100%;padding:13px;margin:8px 0;border:1px solid #ddd;border-radius:7px;font-size:15px}
+button{background:#111;color:white;border:0;border-radius:7px;padding:12px 17px;font-weight:bold;cursor:pointer}
+button.sec{background:#eee;color:#111}
+h2{font-size:19px;margin-top:0}
+.item{border-bottom:1px solid #eee;padding:13px 0;font-size:14px}
+.item:last-child{border:0}
+.muted{color:#777;font-size:13px}
+.hidden{display:none}
+.tag{display:inline-block;background:#eee;border-radius:20px;padding:5px 9px;font-size:12px}
+#mensaje{font-size:13px;margin-top:12px;color:#a22}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{background:#f5f5f5;padding:15px;border-radius:9px}
+.stat strong{display:block;font-size:25px;margin-top:7px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CANTO</h1>
+  <p>PANEL DE ADMINISTRACIÓN</p>
+</header>
+
+<main>
+  <section class="panel" id="login">
+    <h2>Ingresar al panel</h2>
+    <p class="muted">Acceso exclusivo para administración.</p>
+    <input id="email" type="email" placeholder="Tu correo electrónico">
+    <input id="password" type="password" placeholder="Tu contraseña">
+    <button id="entrar">Ingresar</button>
+    <p id="mensaje"></p>
+  </section>
+
+  <section id="contenido" class="hidden">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2>Resumen de CANTO</h2>
+        <button class="sec" id="salir">Cerrar sesión</button>
+      </div>
+      <div class="grid">
+        <div class="stat">Pedidos<strong id="totalPedidos">-</strong></div>
+        <div class="stat">Pagados<strong id="totalPagados">-</strong></div>
+        <div class="stat">Productos<strong id="totalProductos">-</strong></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Pedidos y ventas</h2>
+      <div id="pedidos" class="muted">Cargando pedidos...</div>
+    </div>
+
+    <div class="panel">
+      <h2>Inventario</h2>
+      <div id="inventario" class="muted">Cargando inventario...</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const SUPABASE_URL = "https://jodqedzvepoxmkbzqyce.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZHFlZHp2ZXBveG1rYnpxeWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4ODM4NDgsImV4cCI6MjEwODQ1OTg0OH0.VCMocWDDA7BfTT1xdcY0Xf4xOiYEqz16FlFPOTE3RmI";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+
+function escapar(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function mostrarPanel() {
+  $("login").classList.add("hidden");
+  $("contenido").classList.remove("hidden");
+}
+
+function mostrarLogin() {
+  $("contenido").classList.add("hidden");
+  $("login").classList.remove("hidden");
+}
+
+async function verificarAdmin() {
+  const {data:{user}} = await db.auth.getUser();
+  if (!user) {
+    mostrarLogin();
+    return false;
+  }
+
+  const {data,error} = await db
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id",user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    await db.auth.signOut();
+    $("mensaje").textContent = "Esta cuenta no tiene permisos de administrador.";
+    mostrarLogin();
+    return false;
+  }
+
+  mostrarPanel();
+  await cargarDatos();
+  return true;
+}
+
+$("entrar").onclick = async () => {
+  $("mensaje").textContent = "Verificando acceso...";
+  const {error} = await db.auth.signInWithPassword({
+    email:$("email").value.trim(),
+    password:$("password").value
+  });
+
+  if (error) {
+    $("mensaje").textContent = "No se pudo ingresar. Revisá el correo y la contraseña.";
+    return;
+  }
+
+  await verificarAdmin();
+};
+
+$("salir").onclick = async () => {
+  await db.auth.signOut();
+  mostrarLogin();
+  $("password").value = "";
+  $("mensaje").textContent = "Sesión cerrada.";
+};
+
+async function cargarDatos() {
+  $("pedidos").textContent = "Cargando pedidos...";
+  $("inventario").textContent = "Cargando inventario...";
+
+  const [p,d,prod,talles] = await Promise.all([
+    db.from("pedidos").select("*").order("creado_en",{ascending:false}),
+    db.from("detalle_pedidos").select("*"),
+    db.from("productos").select("*"),
+    db.from("talles").select("*")
+  ]);
+
+  if (p.error || d.error || prod.error || talles.error) {
+    $("pedidos").textContent = "No se pudieron cargar los datos. Revisá los permisos RLS.";
+    $("inventario").textContent = "Error al consultar el inventario.";
+    console.error(p.error,d.error,prod.error,talles.error);
+    return;
+  }
+
+  const pedidos = p.data || [];
+  const detalles = d.data || [];
+  const productos = prod.data || [];
+  const stock = talles.data || [];
+
+  $("totalPedidos").textContent = pedidos.length;
+  $("totalPagados").textContent = pedidos.filter(x=>x.estado==="pagado").length;
+  $("totalProductos").textContent = productos.length;
+
+  if (!pedidos.length) {
+    $("pedidos").textContent = "Todavía no hay pedidos.";
+  } else {
+    $("pedidos").innerHTML = pedidos.map(pedido => {
+      const items = detalles.filter(x=>String(x.pedido_id)===String(pedido.id));
+      return `
+        <div class="item">
+          <strong>${escapar(pedido.numero_pedido || "Pedido #"+pedido.id)}</strong>
+          <span class="tag">${escapar(pedido.estado)}</span>
+          <p>${escapar(pedido.nombre_cliente || "Cliente")} · ${escapar(pedido.telefono || "")}</p>
+          <p><strong>$${Number(pedido.total || 0).toLocaleString("es-AR")}</strong></p>
+          <p class="muted">${escapar(pedido.creado_en || "")}</p>
+          ${items.map(i=>`
+            <div class="muted">
+              Producto ID: ${escapar(i.producto_id)} · Talle: ${escapar(i.talle)} · Cantidad: ${escapar(i.cantidad)}
+            </div>
+          `).join("")}
+        </div>`;
+    }).join("");
+  }
+
+  if (!productos.length) {
+    $("inventario").textContent = "Todavía no hay productos.";
+  } else {
+    $("inventario").innerHTML = productos.map(producto => {
+      const variantes = stock.filter(x=>String(x.producto_id)===String(producto.id));
+      return `
+        <div class="item">
+          <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
+          <p class="muted">Código: ${escapar(producto.codigo || "-")} · Precio: $${Number(producto.precio_lista || 0).toLocaleString("es-AR")}</p>
+          <p class="muted">Estado: ${producto.activo ? "Activo" : "Inactivo"}</p>
+          ${variantes.map(v=>`
+            <span class="tag">${escapar(v.talle)}: ${escapar(v.stock)} unidades</span>
+          `).join(" ")}
+        </div>`;
+    }).join("");
+  }
+}
+
+db.auth.getSession().then(({data}) => {
+  if (data.session) verificarAdmin();
+});
+</script>
+</body>
+</html>
