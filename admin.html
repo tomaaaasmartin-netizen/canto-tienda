@@ -163,7 +163,16 @@ async function cargarDatos() {
   const detalles = d.data || [];
   const productos = prod.data || [];
   const stock = talles.data || [];
+  
+  function nombreProducto(id) {
+    const producto = productos.find(
+      x => String(x.id) === String(id)
+    );
 
+    return producto
+      ? `${producto.marca || ""} ${producto.nombre || ""}`.trim()
+      : `Producto ID: ${id}`;
+  }
   $("totalPedidos").textContent = pedidos.length;
   $("totalPagados").textContent = pedidos.filter(x=>x.estado==="pagado").length;
   $("totalProductos").textContent = productos.length;
@@ -172,22 +181,37 @@ async function cargarDatos() {
     $("pedidos").textContent = "Todavía no hay pedidos.";
   } else {
     $("pedidos").innerHTML = pedidos.map(pedido => {
-      const items = detalles.filter(x=>String(x.pedido_id)===String(pedido.id));
-      return `
+  const items = detalles.filter(
+    x => String(x.pedido_id) === String(pedido.id)
+  );
+
+  return `
+    <div class="item">
+      <strong>${escapar(pedido.numero_pedido || "Pedido #" + pedido.id)}</strong>
+      <span class="tag">${escapar(pedido.estado)}</span>
+
+      <p>${escapar(pedido.nombre_cliente || "Cliente")} · ${escapar(pedido.telefono || "")}</p>
+
+      <p><strong>$${Number(pedido.total || 0).toLocaleString("es-AR")}</strong></p>
+
+      <p class="muted">${escapar(pedido.creado_en || "")}</p>
+
+      ${items.map(i => `
         <div class="item">
-          <strong>${escapar(pedido.numero_pedido || "Pedido #"+pedido.id)}</strong>
-          <span class="tag">${escapar(pedido.estado)}</span>
-          <p>${escapar(pedido.nombre_cliente || "Cliente")} · ${escapar(pedido.telefono || "")}</p>
-          <p><strong>$${Number(pedido.total || 0).toLocaleString("es-AR")}</strong></p>
-          <p class="muted">${escapar(pedido.creado_en || "")}</p>
-          ${items.map(i=>`
-            <div class="muted">
-              Producto ID: ${escapar(i.producto_id)} · Talle: ${escapar(i.talle)} · Cantidad: ${escapar(i.cantidad)}
-            </div>
-          `).join("")}
-        </div>`;
-    }).join("");
-  }
+          <strong>${escapar(nombreProducto(i.producto_id))}</strong>
+          <p class="muted">
+            Talle: ${escapar(i.talle)}
+            · Cantidad: ${escapar(i.cantidad)}
+          </p>
+        </div>
+      `).join("")}
+
+      ${pedido.email ? `
+        <p class="muted">Email: ${escapar(pedido.email)}</p>
+      ` : ""}
+    </div>
+  `;
+}).join("");
 
   if (!productos.length) {
     $("inventario").textContent = "Todavía no hay productos.";
