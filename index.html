@@ -1151,6 +1151,15 @@ function cantoMostrarCarrito() {
 
       document.getElementById('cantoCancelarCompra')
         .addEventListener('click', () => formulario.remove());
+      const selectorEntrega = document.getElementById('cantoModalidadEntrega');
+const datosEntrega = document.getElementById('cantoDatosEntrega');
+
+selectorEntrega.addEventListener('change', () => {
+  datosEntrega.style.display =
+    selectorEntrega.value === 'Envío a domicilio'
+      ? 'block'
+      : 'none';
+});
       document.getElementById('cantoContinuarCompra')
   .addEventListener('click', async () => {
     const nombre = document.getElementById('cantoNombreCliente').value.trim();
@@ -1167,11 +1176,32 @@ function cantoMostrarCarrito() {
       return;
     }
 
-    window.cantoDatosCliente = {
-      nombre,
-      telefono,
-      email
-    };
+    const modalidad = document.getElementById('cantoModalidadEntrega').value;
+const localidad = document.getElementById('cantoLocalidadEntrega').value.trim();
+const direccion = document.getElementById('cantoDireccionEntrega').value.trim();
+const referencia = document.getElementById('cantoReferenciaEntrega').value.trim();
+
+if (!modalidad) {
+  alert('Seleccioná una forma de entrega.');
+  return;
+}
+
+if (modalidad === 'Envío a domicilio' && (!localidad || !direccion)) {
+  alert('Completá la localidad y la dirección de entrega.');
+  return;
+}
+
+window.cantoDatosCliente = {
+  nombre,
+  telefono,
+  email,
+  entrega: {
+    modalidad,
+    localidad,
+    direccion,
+    referencia
+  }
+};
 
     const botonContinuar = document.getElementById('cantoContinuarCompra');
 
@@ -1189,10 +1219,11 @@ try {
           email
         },
         items: cantoCarrito.map(item => ({
-          id: item.id,
-          talle: item.talle,
-          cantidad: item.cantidad
-        }))
+  id: item.id,
+  talle: item.talle,
+  cantidad: item.cantidad
+})),
+entrega: window.cantoDatosCliente.entrega
       }
     }
   );
