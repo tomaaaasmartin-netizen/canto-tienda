@@ -1100,6 +1100,30 @@ function cantoMostrarCarrito() {
           <input id="cantoNombreCliente" type="text"
             placeholder="Tu nombre"
             style="width:100%;padding:12px;margin:7px 0 15px">
+            <label>Forma de entrega</label>
+<select id="cantoModalidadEntrega"
+  style="width:100%;padding:12px;margin:7px 0 15px">
+  <option value="">Seleccioná una opción</option>
+  <option value="Punto de encuentro">Punto de encuentro — Coordinar con vendedor (Gratis)</option>
+  <option value="Envío a domicilio">Envío a domicilio ($4.000 en zonas habilitadas)</option>
+</select>
+
+<div id="cantoDatosEntrega" style="display:none">
+  <label>Localidad</label>
+  <input id="cantoLocalidadEntrega" type="text"
+    placeholder="Ej: Merlo"
+    style="width:100%;padding:12px;margin:7px 0 15px">
+
+  <label>Dirección</label>
+  <input id="cantoDireccionEntrega" type="text"
+    placeholder="Calle y altura"
+    style="width:100%;padding:12px;margin:7px 0 15px">
+
+  <label>Referencia (opcional)</label>
+  <input id="cantoReferenciaEntrega" type="text"
+    placeholder="Piso, departamento, entre calles..."
+    style="width:100%;padding:12px;margin:7px 0 20px">
+</div>
 
           <label>Teléfono</label>
           <input id="cantoTelefonoCliente" type="tel"
