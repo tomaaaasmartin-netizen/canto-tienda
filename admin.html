@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CANTO | Administración</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f4f4f4;color:#171717;font-family:Arial,sans-serif}
@@ -14,10 +14,20 @@ header h1{margin:0;font-size:25px;letter-spacing:3px}
 header p{margin:7px 0 0;color:#bbb;font-size:12px}
 main{max-width:950px;margin:25px auto;padding:15px}
 .panel{background:white;border-radius:12px;padding:20px;margin-bottom:18px}
-input{width:100%;padding:13px;margin:8px 0;border:1px solid #ddd;border-radius:7px;font-size:15px}
-button{background:#111;color:white;border:0;border-radius:7px;padding:12px 17px;font-weight:bold;cursor:pointer}
+input,select,textarea{
+ width:100%;padding:13px;margin:8px 0;
+ border:1px solid #ddd;border-radius:7px;font-size:15px;
+ background:white;color:#171717
+}
+textarea{min-height:85px;resize:vertical}
+button{
+ background:#111;color:white;border:0;border-radius:7px;
+ padding:12px 17px;font-weight:bold;cursor:pointer
+}
 button.sec{background:#eee;color:#111}
+button:disabled{opacity:.5;cursor:not-allowed}
 h2{font-size:19px;margin-top:0}
+h3{font-size:16px}
 .item{border-bottom:1px solid #eee;padding:13px 0;font-size:14px}
 .item:last-child{border:0}
 .muted{color:#777;font-size:13px}
@@ -27,52 +37,186 @@ h2{font-size:19px;margin-top:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .stat{background:#f5f5f5;padding:15px;border-radius:9px}
 .stat strong{display:block;font-size:25px;margin-top:7px}
+.campo{margin:13px 0}
+.campo label{font-size:13px;font-weight:bold;display:block}
+.campo small{color:#777}
+.preview{
+ width:100%;max-width:230px;height:220px;
+ object-fit:contain;background:#f5f5f5;
+ border-radius:9px;margin-top:10px
+}
+.acciones{display:flex;gap:8px;flex-wrap:wrap}
+.separador{border:0;border-top:1px solid #eee;margin:20px 0}
 </style>
 </head>
+
 <body>
+
 <header>
   <h1>CANTO</h1>
   <p>PANEL DE ADMINISTRACIÓN</p>
 </header>
 
 <main>
-  <section class="panel" id="login">
-    <h2>Ingresar al panel</h2>
-    <p class="muted">Acceso exclusivo para administración.</p>
-    <input id="email" type="email" placeholder="Tu correo electrónico">
-    <input id="password" type="password" placeholder="Tu contraseña">
-    <button id="entrar">Ingresar</button>
-    <p id="mensaje"></p>
-  </section>
 
-  <section id="contenido" class="hidden">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <h2>Resumen de CANTO</h2>
-        <button class="sec" id="salir">Cerrar sesión</button>
+<section class="panel" id="login">
+  <h2>Ingresar al panel</h2>
+  <p class="muted">Acceso exclusivo para administración.</p>
+  <input id="email" type="email" placeholder="Tu correo electrónico">
+  <input id="password" type="password" placeholder="Tu contraseña">
+  <button id="entrar">Ingresar</button>
+  <p id="mensaje"></p>
+</section>
+
+<section id="contenido" class="hidden">
+
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2>Resumen de CANTO</h2>
+      <button class="sec" id="salir">Cerrar sesión</button>
+    </div>
+
+    <div class="grid">
+      <div class="stat">Pedidos<strong id="totalPedidos">-</strong></div>
+      <div class="stat">Pagados<strong id="totalPagados">-</strong></div>
+      <div class="stat">Productos<strong id="totalProductos">-</strong></div>
+    </div>
+  </div>
+
+  <!-- ALTA DE PRODUCTOS -->
+
+  <div class="panel">
+    <h2>Agregar producto nuevo</h2>
+    <p class="muted">Completá los datos de la prenda y cargá su fotografía.</p>
+
+    <form id="formProducto">
+
+      <div class="campo">
+        <label>Fotografía del producto *</label>
+        <input id="fotoProducto" type="file" accept="image/*" required>
+        <small>Seleccioná una imagen desde la galería de tu celular.</small>
+        <div>
+          <img id="vistaPrevia" class="preview hidden" alt="Vista previa del producto">
+        </div>
       </div>
+
+      <hr class="separador">
+
       <div class="grid">
-        <div class="stat">Pedidos<strong id="totalPedidos">-</strong></div>
-        <div class="stat">Pagados<strong id="totalPagados">-</strong></div>
-        <div class="stat">Productos<strong id="totalProductos">-</strong></div>
+        <div class="campo">
+          <label>Marca *</label>
+          <input id="marcaProducto" required placeholder="Ej: Nike">
+        </div>
+
+        <div class="campo">
+          <label>Nombre del producto *</label>
+          <input id="nombreProducto" required placeholder="Ej: Remera deportiva">
+        </div>
+
+        <div class="campo">
+          <label>Código</label>
+          <input id="codigoProducto" placeholder="Ej: NK001">
+        </div>
+
+        <div class="campo">
+          <label>Precio de venta *</label>
+          <input id="precioProducto" type="number" min="1" step="0.01" required placeholder="Ej: 15000">
+        </div>
+
+        <div class="campo">
+          <label>Categoría *</label>
+          <select id="categoriaProducto" required>
+            <option value="">Seleccionar</option>
+            <option value="Remeras">Remeras</option>
+            <option value="Buzos">Buzos</option>
+            <option value="Pantalones">Pantalones</option>
+            <option value="Camperas">Camperas</option>
+            <option value="Shorts">Shorts</option>
+            <option value="Accesorios">Accesorios</option>
+            <option value="Zapatillas">Zapatillas</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Género *</label>
+          <select id="generoProducto" required>
+            <option value="Unisex">Unisex</option>
+            <option value="Mujer">Mujer</option>
+            <option value="Hombre">Hombre</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="panel">
-      <h2>Pedidos y ventas</h2>
-      <div id="pedidos" class="muted">Cargando pedidos...</div>
-    </div>
+      <div class="campo">
+        <label>Colores</label>
+        <input id="coloresProducto" placeholder="Ej: Negro, Blanco, Gris">
+        <small>Separá los colores con comas.</small>
+      </div>
 
-    <div class="panel">
-      <h2>Inventario</h2>
-      <div id="inventario" class="muted">Cargando inventario...</div>
-    </div>
-  </section>
+      <div class="campo">
+        <label>Descripción</label>
+        <textarea id="descripcionProducto" placeholder="Descripción de la prenda..."></textarea>
+      </div>
+
+      <div class="grid">
+        <div class="campo">
+          <label>Materiales</label>
+          <input id="materialesProducto" placeholder="Ej: Algodón">
+        </div>
+
+        <div class="campo">
+          <label>Calce</label>
+          <input id="calceProducto" placeholder="Ej: Regular">
+        </div>
+
+        <div class="campo">
+          <label>Uso</label>
+          <input id="usoProducto" placeholder="Ej: Deportivo y urbano">
+        </div>
+      </div>
+
+      <hr class="separador">
+
+      <h3>Talles y stock inicial</h3>
+
+      <div class="campo">
+        <label>Talles y cantidades *</label>
+        <textarea id="tallesProducto" required placeholder="Ejemplo:
+S:2
+M:3
+L:2
+XL:1"></textarea>
+        <small>Escribí un talle por línea, separado de la cantidad por dos puntos. Ejemplo: M:3 significa 3 unidades del talle M.</small>
+      </div>
+
+      <button type="submit" id="guardarProducto">Guardar producto</button>
+      <p id="mensajeProducto" class="muted"></p>
+
+    </form>
+  </div>
+
+  <!-- PEDIDOS -->
+
+  <div class="panel">
+    <h2>Pedidos y ventas</h2>
+    <div id="pedidos" class="muted">Cargando pedidos...</div>
+  </div>
+
+  <!-- INVENTARIO -->
+
+  <div class="panel">
+    <h2>Inventario</h2>
+    <div id="inventario" class="muted">Cargando inventario...</div>
+  </div>
+
+</section>
 </main>
 
 <script>
 const SUPABASE_URL = "https://jodqedzvepoxmkbzqyce.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZHFlZHp2ZXBveG1rYnpxeWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4ODM4NDgsImV4cCI6MjEwODQ1OTg0OH0.VCMocWDDA7BfTT1xdcY0Xf4xOiYEqz16FlFPOTE3RmI";
+
+// PEGÁ AQUÍ TU MISMA CLAVE PÚBLICA ANON ACTUAL
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZHFlZWR6dmVwb3htbGJ6cXljZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyODgzODQ4LCJleHAiOjIxMDg0NTk4NDh9.VCMocWDDA7BfTT1xdcY0Xf4xOiYEqz16FlFPOTE3RmI";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -80,7 +224,11 @@ const $ = id => document.getElementById(id);
 
 function escapar(valor) {
   return String(valor ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   })[c]);
 }
 
@@ -96,6 +244,7 @@ function mostrarLogin() {
 
 async function verificarAdmin() {
   const {data:{user}} = await db.auth.getUser();
+
   if (!user) {
     mostrarLogin();
     return false;
@@ -121,6 +270,7 @@ async function verificarAdmin() {
 
 $("entrar").onclick = async () => {
   $("mensaje").textContent = "Verificando acceso...";
+
   const {error} = await db.auth.signInWithPassword({
     email:$("email").value.trim(),
     password:$("password").value
@@ -140,6 +290,221 @@ $("salir").onclick = async () => {
   $("password").value = "";
   $("mensaje").textContent = "Sesión cerrada.";
 };
+
+// VISTA PREVIA DE FOTOGRAFÍA
+
+let fotoTemporal = null;
+
+$("fotoProducto").addEventListener("change", () => {
+  const archivo = $("fotoProducto").files[0];
+
+  if (fotoTemporal) {
+    URL.revokeObjectURL(fotoTemporal);
+    fotoTemporal = null;
+  }
+
+  if (!archivo) {
+    $("vistaPrevia").classList.add("hidden");
+    return;
+  }
+
+  if (!archivo.type.startsWith("image/")) {
+    alert("Seleccioná un archivo de imagen.");
+    $("fotoProducto").value = "";
+    $("vistaPrevia").classList.add("hidden");
+    return;
+  }
+
+  fotoTemporal = URL.createObjectURL(archivo);
+  $("vistaPrevia").src = fotoTemporal;
+  $("vistaPrevia").classList.remove("hidden");
+});
+
+// INTERPRETAR TALLES
+
+function leerTalles(texto) {
+  const lineas = texto.split(/\n|,/);
+  const resultado = [];
+
+  for (const linea of lineas) {
+    if (!linea.trim()) continue;
+
+    const partes = linea.split(":");
+
+    if (partes.length !== 2) {
+      throw new Error("Revisá el formato de los talles. Usá, por ejemplo, M:3.");
+    }
+
+    const talle = partes[0].trim();
+    const cantidadTexto = partes[1].trim();
+    const cantidad = Number(cantidadTexto);
+
+    if (!talle || cantidadTexto === "" ||
+        !Number.isInteger(cantidad) || cantidad < 0) {
+      throw new Error("Hay un talle o una cantidad incorrecta.");
+    }
+
+    if (resultado.some(x => x.talle.toLowerCase() === talle.toLowerCase())) {
+      throw new Error("No repitas el mismo talle.");
+    }
+
+    resultado.push({
+      talle,
+      stock:cantidad,
+      disponible:cantidad > 0
+    });
+  }
+
+  if (!resultado.length) {
+    throw new Error("Cargá al menos un talle.");
+  }
+
+  return resultado;
+}
+
+// SUBIR FOTOGRAFÍA Y GUARDAR PRODUCTO
+
+$("formProducto").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const boton = $("guardarProducto");
+  const mensaje = $("mensajeProducto");
+
+  boton.disabled = true;
+  mensaje.textContent = "Preparando producto...";
+
+  try {
+    const archivo = $("fotoProducto").files[0];
+
+    if (!archivo) {
+      throw new Error("Seleccioná una fotografía.");
+    }
+
+    const precio = Number($("precioProducto").value);
+
+    if (!Number.isFinite(precio) || precio <= 0) {
+      throw new Error("Ingresá un precio válido.");
+    }
+
+    const talles = leerTalles($("tallesProducto").value);
+
+    const usuario = await db.auth.getUser();
+
+    if (!usuario.data.user) {
+      throw new Error("Tu sesión venció. Volvé a ingresar.");
+    }
+
+    // Subir foto a Supabase Storage
+
+    mensaje.textContent = "Subiendo fotografía...";
+
+    const extensionOriginal = archivo.name.split(".").pop().toLowerCase();
+    const extension = /^[a-z0-9]+$/.test(extensionOriginal)
+      ? extensionOriginal
+      : "jpg";
+
+    const nombreArchivo =
+      "canto-" + Date.now() + "-" +
+      Math.random().toString(36).slice(2) + "." + extension;
+
+    const {error: errorFoto} = await db.storage
+      .from("productos")
+      .upload(nombreArchivo, archivo, {
+        cacheControl:"3600",
+        upsert:false,
+        contentType:archivo.type
+      });
+
+    if (errorFoto) {
+      throw new Error("No se pudo subir la foto: " + errorFoto.message);
+    }
+
+    const {data: urlFoto} = db.storage
+      .from("productos")
+      .getPublicUrl(nombreArchivo);
+
+    // Guardar producto
+
+    mensaje.textContent = "Guardando datos del producto...";
+
+    const colores = $("coloresProducto").value
+      .split(",")
+      .map(x => x.trim())
+      .filter(Boolean);
+
+    const producto = {
+      marca:$("marcaProducto").value.trim(),
+      nombre:$("nombreProducto").value.trim(),
+      codigo:$("codigoProducto").value.trim() || null,
+      precio_lista:precio,
+      precio_venta:precio,
+      foto:urlFoto.publicUrl,
+      activo:true,
+      categoria:$("categoriaProducto").value,
+      genero:$("generoProducto").value,
+      colores:colores,
+      descripcion:$("descripcionProducto").value.trim(),
+      materiales:$("materialesProducto").value.trim(),
+      calce:$("calceProducto").value.trim(),
+      uso:$("usoProducto").value.trim()
+    };
+
+    const {data: nuevoProducto, error:errorProducto} = await db
+      .from("productos")
+      .insert(producto)
+      .select("id")
+      .single();
+
+    if (errorProducto) {
+      throw new Error("No se pudo guardar el producto: " + errorProducto.message);
+    }
+
+    // Guardar talles y stock
+
+    mensaje.textContent = "Guardando talles y stock...";
+
+    const filasTalles = talles.map(t => ({
+      producto_id:nuevoProducto.id,
+      talle:t.talle,
+      stock:t.stock,
+      disponible:t.disponible
+    }));
+
+    const {error:errorTalles} = await db
+      .from("talles")
+      .insert(filasTalles);
+
+    if (errorTalles) {
+      mensaje.textContent =
+        "El producto se guardó, pero hubo un problema al cargar sus talles: " +
+        errorTalles.message;
+      return;
+    }
+
+    alert("¡Producto cargado correctamente en CANTO!");
+
+    $("formProducto").reset();
+    $("vistaPrevia").classList.add("hidden");
+
+    if (fotoTemporal) {
+      URL.revokeObjectURL(fotoTemporal);
+      fotoTemporal = null;
+    }
+
+    mensaje.textContent = "Producto guardado correctamente.";
+
+    await cargarDatos();
+
+  } catch (error) {
+    console.error(error);
+    mensaje.textContent = error.message || "Ocurrió un error al guardar.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+// ACTUALIZAR STOCK
+
 async function guardarStock(talleId) {
   const campo = $("stock-" + talleId);
   const nuevoStock = Number(campo.value);
@@ -150,9 +515,9 @@ async function guardarStock(talleId) {
   }
 
   const { error } = await db.rpc("admin_actualizar_stock", {
-    p_talle_id: talleId,
-    p_nuevo_stock: nuevoStock,
-    p_motivo: "Ajuste desde administrador"
+    p_talle_id:talleId,
+    p_nuevo_stock:nuevoStock,
+    p_motivo:"Ajuste desde administrador"
   });
 
   if (error) {
@@ -164,6 +529,9 @@ async function guardarStock(talleId) {
   alert("¡Stock actualizado correctamente!");
   await cargarDatos();
 }
+
+// CARGAR PEDIDOS E INVENTARIO
+
 async function cargarDatos() {
   $("pedidos").textContent = "Cargando pedidos...";
   $("inventario").textContent = "Cargando inventario...";
@@ -186,7 +554,7 @@ async function cargarDatos() {
   const detalles = d.data || [];
   const productos = prod.data || [];
   const stock = talles.data || [];
-  
+
   function nombreProducto(id) {
     const producto = productos.find(
       x => String(x.id) === String(id)
@@ -196,98 +564,98 @@ async function cargarDatos() {
       ? `${producto.marca || ""} ${producto.nombre || ""}`.trim()
       : `Producto ID: ${id}`;
   }
+
   $("totalPedidos").textContent = pedidos.length;
-  $("totalPagados").textContent = pedidos.filter(x=>x.estado==="pagado").length;
+  $("totalPagados").textContent =
+    pedidos.filter(x => x.estado === "pagado").length;
   $("totalProductos").textContent = productos.length;
 
   if (!pedidos.length) {
     $("pedidos").textContent = "Todavía no hay pedidos.";
   } else {
     $("pedidos").innerHTML = pedidos.map(pedido => {
-  const items = detalles.filter(
-    x => String(x.pedido_id) === String(pedido.id)
-  );
+      const items = detalles.filter(
+        x => String(x.pedido_id) === String(pedido.id)
+      );
 
-  return `
-    <div class="item">
-      <strong>${escapar(pedido.numero_pedido || "Pedido #" + pedido.id)}</strong>
-      <span class="tag">${escapar(pedido.estado)}</span>
-
-      <p>${escapar(pedido.nombre_cliente || "Cliente")} · ${escapar(pedido.telefono || "")}</p>
-
-      <p><strong>$${Number(pedido.total || 0).toLocaleString("es-AR")}</strong></p>
-
-      <p class="muted">${escapar(pedido.creado_en || "")}</p>
-
-      ${items.map(i => `
+      return `
         <div class="item">
-          <strong>${escapar(nombreProducto(i.producto_id))}</strong>
-          <p class="muted">
-            Talle: ${escapar(i.talle)}
-            · Cantidad: ${escapar(i.cantidad)}
-          </p>
+          <strong>${escapar(pedido.numero_pedido || "Pedido #" + pedido.id)}</strong>
+          <span class="tag">${escapar(pedido.estado)}</span>
+
+          <p>${escapar(pedido.nombre_cliente || "Cliente")} · ${escapar(pedido.telefono || "")}</p>
+
+          <p><strong>$${Number(pedido.total || 0).toLocaleString("es-AR")}</strong></p>
+
+          <p class="muted">${escapar(pedido.creado_en || "")}</p>
+
+          ${items.map(i => `
+            <div class="item">
+              <strong>${escapar(nombreProducto(i.producto_id))}</strong>
+              <p class="muted">
+                Talle: ${escapar(i.talle)}
+                · Cantidad: ${escapar(i.cantidad)}
+              </p>
+            </div>
+          `).join("")}
+
+          ${pedido.email ? `
+            <p class="muted">Email: ${escapar(pedido.email)}</p>
+          ` : ""}
         </div>
-      `).join("")}
-
-      ${pedido.email ? `
-        <p class="muted">Email: ${escapar(pedido.email)}</p>
-      ` : ""}
-    </div>
-  `;
-}).join("");
+      `;
+    }).join("");
   }
-  
+
   if (!productos.length) {
-  $("inventario").textContent = "Todavía no hay productos.";
-} else {
-  $("inventario").innerHTML = productos.map(producto => {
-    const variantes = stock.filter(
-      x => String(x.producto_id) === String(producto.id)
-    );
+    $("inventario").textContent = "Todavía no hay productos.";
+  } else {
+    $("inventario").innerHTML = productos.map(producto => {
+      const variantes = stock.filter(
+        x => String(x.producto_id) === String(producto.id)
+      );
 
-    return `
-      <div class="item">
-        <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
+      return `
+        <div class="item">
+          <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
 
-        <p class="muted">
-          Código: ${escapar(producto.codigo || "-")}
-          · Precio: $${Number(producto.precio_lista || 0).toLocaleString("es-AR")}
-        </p>
+          <p class="muted">
+            Código: ${escapar(producto.codigo || "-")}
+            · Precio: $${Number(producto.precio_lista || 0).toLocaleString("es-AR")}
+          </p>
 
-        <p class="muted">
-          Estado: ${producto.activo ? "Activo" : "Inactivo"}
-        </p>
+          <p class="muted">
+            Estado: ${producto.activo ? "Activo" : "Inactivo"}
+          </p>
 
-        ${variantes.length ? variantes.map(v => `
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
-            <strong>${escapar(v.talle)}</strong>
+          ${variantes.length ? variantes.map(v => `
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <strong>${escapar(v.talle)}</strong>
 
-            <input
-              id="stock-${Number(v.id)}"
-              type="number"
-              min="0"
-              step="1"
-              value="${Number(v.stock)}"
-              style="width:85px;margin:0;padding:9px"
-            >
+              <input
+                id="stock-${Number(v.id)}"
+                type="number"
+                min="0"
+                step="1"
+                value="${Number(v.stock)}"
+                style="width:85px;margin:0;padding:9px"
+              >
 
-            <span class="muted">unidades</span>
+              <span class="muted">unidades</span>
 
-            <button
-              type="button"
-              onclick="guardarStock(${Number(v.id)})"
-              style="padding:9px 12px"
-            >
-              Guardar
-            </button>
-          </div>
-        `).join("") : `
-          <p class="muted">Este producto todavía no tiene talles cargados.</p>
-        `}
-      </div>
-    `;
-  }).join("");
-}
+              <button
+                type="button"
+                onclick="guardarStock(${Number(v.id)})"
+                style="padding:9px 12px"
+              >Guardar</button>
+            </div>
+          `).join("") : `
+            <p class="muted">Este producto todavía no tiene talles cargados.</p>
+          `}
+        </div>
+      `;
+    }).join("");
+  }
 }
 
 db.auth.getSession().then(({data}) => {
