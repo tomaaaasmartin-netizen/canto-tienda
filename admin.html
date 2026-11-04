@@ -194,7 +194,103 @@ XL:1"></textarea>
 
     </form>
   </div>
+ 
+  <!-- EDITAR PRODUCTO -->
 
+  <div class="panel hidden" id="panelEditarProducto">
+    <h2>Editar producto</h2>
+    <p class="muted">Modificá los datos del producto seleccionado.</p>
+
+    <form id="formEditarProducto">
+
+      <input type="hidden" id="editarId">
+
+      <div class="campo">
+        <label>Fotografía nueva (opcional)</label>
+        <input id="editarFoto" type="file" accept="image/*">
+        <img id="editarVistaPrevia" class="preview hidden" alt="Vista previa">
+        <small>Si no elegís una foto, se conserva la actual.</small>
+      </div>
+
+      <div class="grid">
+        <div class="campo">
+          <label>Marca *</label>
+          <input id="editarMarca" required>
+        </div>
+
+        <div class="campo">
+          <label>Nombre *</label>
+          <input id="editarNombre" required>
+        </div>
+
+        <div class="campo">
+          <label>Código</label>
+          <input id="editarCodigo">
+        </div>
+
+        <div class="campo">
+          <label>Precio *</label>
+          <input id="editarPrecio" type="number" min="1" step="0.01" required>
+        </div>
+
+        <div class="campo">
+          <label>Categoría *</label>
+          <select id="editarCategoria" required>
+            <option value="Remeras">Remeras</option>
+            <option value="Buzos">Buzos</option>
+            <option value="Pantalones">Pantalones</option>
+            <option value="Camperas">Camperas</option>
+            <option value="Shorts">Shorts</option>
+            <option value="Accesorios">Accesorios</option>
+            <option value="Zapatillas">Zapatillas</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Género</label>
+          <select id="editarGenero">
+            <option value="Unisex">Unisex</option>
+            <option value="Mujer">Mujer</option>
+            <option value="Hombre">Hombre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Colores</label>
+        <input id="editarColores">
+      </div>
+
+      <div class="campo">
+        <label>Descripción</label>
+        <textarea id="editarDescripcion"></textarea>
+      </div>
+
+      <div class="grid">
+        <div class="campo">
+          <label>Materiales</label>
+          <input id="editarMateriales">
+        </div>
+
+        <div class="campo">
+          <label>Calce</label>
+          <input id="editarCalce">
+        </div>
+
+        <div class="campo">
+          <label>Uso</label>
+          <input id="editarUso">
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" id="guardarEdicion">Guardar cambios</button>
+        <button type="button" class="sec" id="cancelarEdicion">Cancelar</button>
+      </div>
+
+      <p id="mensajeEdicion" class="muted"></p>
+    </form>
+  </div>
   <!-- PEDIDOS -->
 
   <div class="panel">
@@ -501,7 +597,169 @@ $("formProducto").addEventListener("submit", async (e) => {
     boton.disabled = false;
   }
 });
+// ABRIR FORMULARIO PARA EDITAR PRODUCTO
 
+let productoEditando = null;
+
+async function editarProducto(id) {
+  const { data, error } = await db
+    .from("productos")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    alert("No se pudo cargar el producto.");
+    console.error(error);
+    return;
+  }
+
+  productoEditando = data;
+
+  $("editarId").value = data.id;
+  $("editarMarca").value = data.marca || "";
+  $("editarNombre").value = data.nombre || "";
+  $("editarCodigo").value = data.codigo || "";
+  $("editarPrecio").value = data.precio_lista || "";
+  $("editarCategoria").value = data.categoria || "Remeras";
+  $("editarGenero").value = data.genero || "Unisex";
+  $("editarColores").value = Array.isArray(data.colores)
+    ? data.colores.join(", ")
+    : data.colores || "";
+  $("editarDescripcion").value = data.descripcion || "";
+  $("editarMateriales").value = data.materiales || "";
+  $("editarCalce").value = data.calce || "";
+  $("editarUso").value = data.uso || "";
+
+  $("editarFoto").value = "";
+  $("editarVistaPrevia").src = data.foto || "";
+  $("editarVistaPrevia").classList.toggle("hidden", !data.foto);
+
+  $("mensajeEdicion").textContent = "";
+
+  $("panelEditarProducto").classList.remove("hidden");
+
+  $("panelEditarProducto").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+ // GUARDAR CAMBIOS DEL PRODUCTO
+
+$("formEditarProducto").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const boton = $("guardarEdicion");
+  const mensaje = $("mensajeEdicion");
+
+  if (!productoEditando) {
+    mensaje.textContent = "No hay ningún producto seleccionado.";
+    return;
+  }
+
+  boton.disabled = true;
+  mensaje.textContent = "Guardando cambios...";
+
+  try {
+    const precio = Number($("editarPrecio").value);
+
+    if (!Number.isFinite(precio) || precio <= 0) {
+      throw new Error("Ingresá un precio válido.");
+    }
+
+    let foto = productoEditando.foto;
+    const archivo = $("editarFoto").files[0];
+
+    if (archivo) {
+      if (!archivo.type.startsWith("image/")) {
+        throw new Error("Seleccioná una imagen válida.");
+      }
+
+      mensaje.textContent = "Subiendo nueva fotografía...";
+
+      const extensionOriginal = archivo.name.split(".").pop().toLowerCase();
+      const extension = /^[a-z0-9]+$/.test(extensionOriginal)
+        ? extensionOriginal
+        : "jpg";
+
+      const nombreArchivo =
+        "canto-" + Date.now() + "-" +
+        Math.random().toString(36).slice(2) + "." + extension;
+
+      const {error:errorFoto} = await db.storage
+        .from("productos")
+        .upload(nombreArchivo, archivo, {
+          cacheControl:"3600",
+          upsert:false,
+          contentType:archivo.type
+        });
+
+      if (errorFoto) {
+        throw new Error("No se pudo subir la foto: " + errorFoto.message);
+      }
+
+      const {data:urlFoto} = db.storage
+        .from("productos")
+        .getPublicUrl(nombreArchivo);
+
+      foto = urlFoto.publicUrl;
+    }
+
+    const cambios = {
+      marca:$("editarMarca").value.trim(),
+      nombre:$("editarNombre").value.trim(),
+      codigo:$("editarCodigo").value.trim() || null,
+      precio_lista:precio,
+      precio_venta:precio,
+      foto:foto,
+      categoria:$("editarCategoria").value,
+      genero:$("editarGenero").value,
+      colores:$("editarColores").value
+        .split(",")
+        .map(x => x.trim())
+        .filter(Boolean),
+      descripcion:$("editarDescripcion").value.trim(),
+      materiales:$("editarMateriales").value.trim(),
+      calce:$("editarCalce").value.trim(),
+      uso:$("editarUso").value.trim()
+    };
+
+    const {error} = await db
+      .from("productos")
+      .update(cambios)
+      .eq("id", productoEditando.id);
+
+    if (error) {
+      throw new Error("No se pudieron guardar los cambios: " + error.message);
+    }
+
+    alert("¡Producto actualizado correctamente!");
+
+    $("panelEditarProducto").classList.add("hidden");
+    $("formEditarProducto").reset();
+    $("editarVistaPrevia").classList.add("hidden");
+
+    productoEditando = null;
+
+    await cargarDatos();
+
+  } catch (error) {
+    console.error(error);
+    mensaje.textContent = error.message || "Ocurrió un error.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+// CANCELAR EDICIÓN
+
+$("cancelarEdicion").onclick = () => {
+  $("panelEditarProducto").classList.add("hidden");
+  $("formEditarProducto").reset();
+  $("editarVistaPrevia").classList.add("hidden");
+  $("mensajeEdicion").textContent = "";
+  productoEditando = null;
+};
 // ACTUALIZAR STOCK
 
 async function guardarStock(talleId) {
