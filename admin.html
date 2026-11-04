@@ -70,12 +70,48 @@ h3{font-size:16px}
 
 <section id="contenido" class="hidden">
 
-  <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <h2>Resumen de CANTO</h2>
-      <button class="sec" id="salir">Cerrar sesión</button>
-    </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
 
+  <div>
+    <h2 style="margin:0">Resumen de CANTO</h2>
+    <p class="muted" style="margin:6px 0 0">Administración general</p>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center">
+
+    <button
+      type="button"
+      class="sec"
+      id="botonMenu"
+      style="font-size:25px;padding:5px 13px"
+    >⋮</button>
+
+    <button class="sec" id="salir">Cerrar sesión</button>
+
+  </div>
+
+</div>
+
+<div id="menuAdmin" class="hidden" style="
+  margin-top:15px;
+  padding:12px;
+  background:#f5f5f5;
+  border-radius:10px;
+">
+
+  <button class="sec" onclick="irSeccion('resumen')" style="width:100%;text-align:left;margin:4px 0">🏠 Resumen</button>
+
+  <button class="sec" onclick="irSeccion('pedidos')" style="width:100%;text-align:left;margin:4px 0">📦 Pedidos</button>
+
+  <button class="sec" onclick="irSeccion('productos')" style="width:100%;text-align:left;margin:4px 0">👕 Productos</button>
+
+  <button class="sec" onclick="irSeccion('inventario')" style="width:100%;text-align:left;margin:4px 0">📊 Inventario</button>
+
+  <button class="sec" onclick="irSeccion('estadisticas')" style="width:100%;text-align:left;margin:4px 0">📈 Ventas y estadísticas</button>
+
+  <button class="sec" onclick="irSeccion('balance')" style="width:100%;text-align:left;margin:4px 0">💰 Balance</button>
+
+</div>
     <div class="grid">
       <div class="stat">Pedidos<strong id="totalPedidos">-</strong></div>
       <div class="stat">Pagados<strong id="totalPagados">-</strong></div>
@@ -331,7 +367,41 @@ function mostrarPanel() {
   $("login").classList.add("hidden");
   $("contenido").classList.remove("hidden");
 }
+// MENÚ DE ADMINISTRACIÓN
 
+$("botonMenu").onclick = () => {
+  $("menuAdmin").classList.toggle("hidden");
+};
+
+// NAVEGACIÓN ENTRE SECCIONES
+
+function irSeccion(seccion) {
+  const destinos = {
+function irSeccion(seccion) {
+  const destinos = {
+    resumen: "resumenAdmin",
+    pedidos: "pedidosAdmin",
+    productos: "productosAdmin",
+    inventario: "inventarioAdmin",
+    estadisticas: "estadisticasAdmin",
+    balance: "balanceAdmin"
+  };
+
+  const destino = destinos[seccion];
+
+  if (!destino || !$(destino)) {
+    alert("Esta sección todavía está en preparación.");
+    $("menuAdmin").classList.add("hidden");
+    return;
+  }
+
+  $("menuAdmin").classList.add("hidden");
+
+  $(destino).scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
 function mostrarLogin() {
   $("contenido").classList.add("hidden");
   $("login").classList.remove("hidden");
