@@ -140,7 +140,30 @@ $("salir").onclick = async () => {
   $("password").value = "";
   $("mensaje").textContent = "Sesión cerrada.";
 };
+async function guardarStock(talleId) {
+  const campo = $("stock-" + talleId);
+  const nuevoStock = Number(campo.value);
 
+  if (!Number.isInteger(nuevoStock) || nuevoStock < 0) {
+    alert("Ingresá una cantidad válida, igual o mayor a cero.");
+    return;
+  }
+
+  const { error } = await db.rpc("admin_actualizar_stock", {
+    p_talle_id: talleId,
+    p_nuevo_stock: nuevoStock,
+    p_motivo: "Ajuste desde administrador"
+  });
+
+  if (error) {
+    console.error(error);
+    alert("No se pudo actualizar el stock: " + error.message);
+    return;
+  }
+
+  alert("¡Stock actualizado correctamente!");
+  await cargarDatos();
+}
 async function cargarDatos() {
   $("pedidos").textContent = "Cargando pedidos...";
   $("inventario").textContent = "Cargando inventario...";
@@ -215,21 +238,55 @@ async function cargarDatos() {
   }
   
   if (!productos.length) {
-    $("inventario").textContent = "Todavía no hay productos.";
-  } else {
-    $("inventario").innerHTML = productos.map(producto => {
-      const variantes = stock.filter(x=>String(x.producto_id)===String(producto.id));
-      return `
-        <div class="item">
-          <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
-          <p class="muted">Código: ${escapar(producto.codigo || "-")} · Precio: $${Number(producto.precio_lista || 0).toLocaleString("es-AR")}</p>
-          <p class="muted">Estado: ${producto.activo ? "Activo" : "Inactivo"}</p>
-          ${variantes.map(v=>`
-            <span class="tag">${escapar(v.talle)}: ${escapar(v.stock)} unidades</span>
-          `).join(" ")}
-        </div>`;
-    }).join("");
-  }
+  $("inventario").textContent = "Todavía no hay productos.";
+} else {
+  $("inventario").innerHTML = productos.map(producto => {
+    const variantes = stock.filter(
+      x => String(x.producto_id) === String(producto.id)
+    );
+
+    return `
+      <div class="item">
+        <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
+
+        <p class="muted">
+          Código: ${escapar(producto.codigo || "-")}
+          · Precio: $${Number(producto.precio_lista || 0).toLocaleString("es-AR")}
+        </p>
+
+        <p class="muted">
+          Estado: ${producto.activo ? "Activo" : "Inactivo"}
+        </p>
+
+        ${variantes.length ? variantes.map(v => `
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+            <strong>${escapar(v.talle)}</strong>
+
+            <input
+              id="stock-${Number(v.id)}"
+              type="number"
+              min="0"
+              step="1"
+              value="${Number(v.stock)}"
+              style="width:85px;margin:0;padding:9px"
+            >
+
+            <span class="muted">unidades</span>
+
+            <button
+              type="button"
+              onclick="guardarStock(${Number(v.id)})"
+              style="padding:9px 12px"
+            >
+              Guardar
+            </button>
+          </div>
+        `).join("") : `
+          <p class="muted">Este producto todavía no tiene talles cargados.</p>
+        `}
+      </div>
+    `;
+  }).join("");
 }
 
 db.auth.getSession().then(({data}) => {
