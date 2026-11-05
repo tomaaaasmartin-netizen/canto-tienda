@@ -70,76 +70,81 @@ h3{font-size:16px}
 
 <section id="contenido" class="hidden">
 
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-<div class="panel" id="resumenAdmin">
+  <!-- BARRA GENERAL -->
 
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+  <div class="panel" style="position:relative">
 
-    <div>
-      <h2 style="margin:0">Resumen de CANTO</h2>
-      <p class="muted" style="margin:6px 0 0">Administración general</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+
+      <div>
+        <h2 style="margin:0">CANTO</h2>
+        <p class="muted" style="margin:6px 0 0">Administración</p>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button type="button" class="sec" id="botonMenu" style="font-size:25px;padding:5px 13px">⋮</button>
+        <button class="sec" id="salir">Salir</button>
+      </div>
+
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center">
+    <div id="menuAdmin" class="hidden" style="margin-top:15px;padding:12px;background:#f5f5f5;border-radius:10px">
 
-      <button
-        type="button"
-        class="sec"
-        id="botonMenu"
-        style="font-size:25px;padding:5px 13px"
-      >⋮</button>
+      <button class="sec" onclick="irSeccion('resumen')" style="width:100%;text-align:left;margin:4px 0">🏠 Resumen</button>
 
-      <button class="sec" id="salir">Cerrar sesión</button>
+      <button class="sec" onclick="irSeccion('pedidos')" style="width:100%;text-align:left;margin:4px 0">📦 Pedidos</button>
+
+      <button class="sec" onclick="irSeccion('productos')" style="width:100%;text-align:left;margin:4px 0">👕 Productos</button>
+
+      <button class="sec" onclick="irSeccion('inventario')" style="width:100%;text-align:left;margin:4px 0">📊 Inventario</button>
+
+      <button class="sec" onclick="irSeccion('estadisticas')" style="width:100%;text-align:left;margin:4px 0">📈 Estadísticas</button>
+
+      <button class="sec" onclick="irSeccion('balance')" style="width:100%;text-align:left;margin:4px 0">💰 Balance</button>
+
+    </div>
+
+  </div>
+
+  <!-- RESUMEN -->
+
+  <div id="seccionResumen" class="seccionAdmin">
+
+    <div class="panel" id="resumenAdmin">
+
+      <h2>Resumen de CANTO</h2>
+
+      <div class="grid">
+
+        <div class="stat">
+          Pedidos
+          <strong id="totalPedidos">-</strong>
+        </div>
+
+        <div class="stat">
+          Pagados
+          <strong id="totalPagados">-</strong>
+        </div>
+
+        <div class="stat">
+          Productos
+          <strong id="totalProductos">-</strong>
+        </div>
+
+      </div>
 
     </div>
 
   </div>
 
-  <div id="menuAdmin" class="hidden" style="
-    margin-top:15px;
-    padding:12px;
-    background:#f5f5f5;
-    border-radius:10px;
-  ">
+  <!-- SECCIÓN PRODUCTOS -->
 
-    <button class="sec" onclick="irSeccion('resumen')" style="width:100%;text-align:left;margin:4px 0">🏠 Resumen</button>
+<div id="seccionProductos" class="seccionAdmin hidden">
 
-    <button class="sec" onclick="irSeccion('pedidos')" style="width:100%;text-align:left;margin:4px 0">📦 Pedidos</button>
+  <div class="panel" id="productosAdmin">
 
-    <button class="sec" onclick="irSeccion('productos')" style="width:100%;text-align:left;margin:4px 0">👕 Productos</button>
-
-    <button class="sec" onclick="irSeccion('inventario')" style="width:100%;text-align:left;margin:4px 0">📊 Inventario</button>
-
-    <button class="sec" onclick="irSeccion('estadisticas')" style="width:100%;text-align:left;margin:4px 0">📈 Ventas y estadísticas</button>
-
-    <button class="sec" onclick="irSeccion('balance')" style="width:100%;text-align:left;margin:4px 0">💰 Balance</button>
-
-  </div>
-
-  <div class="grid">
-
-    <div class="stat">
-      Pedidos
-      <strong id="totalPedidos">-</strong>
-    </div>
-
-    <div class="stat">
-      Pagados
-      <strong id="totalPagados">-</strong>
-    </div>
-
-    <div class="stat">
-      Productos
-      <strong id="totalProductos">-</strong>
-    </div>
-
-  </div>
-
-</div>
-
-  <<!-- ALTA DE PRODUCTOS -->
-
-<div class="panel" id="productosAdmin">
+    <h2>Productos</h2>
+    <p class="muted">Cargá nuevos productos y administrá sus características.</p>
     <h2>Agregar producto nuevo</h2>
     <p class="muted">Completá los datos de la prenda y cargá su fotografía.</p>
 
@@ -247,8 +252,10 @@ XL:1"></textarea>
       <p id="mensajeProducto" class="muted"></p>
 
     </form>
-  </div>
- 
+    </div>
+
+</div>
+
   <!-- EDITAR PRODUCTO -->
 
   <div class="panel hidden" id="panelEditarProducto">
@@ -342,10 +349,15 @@ XL:1"></textarea>
         <button type="button" class="sec" id="cancelarEdicion">Cancelar</button>
       </div>
 
-      <p id="mensajeEdicion" class="muted"></p>
+            <p id="mensajeEdicion" class="muted"></p>
     </form>
   </div>
+
+</div>
+
   <!-- PEDIDOS -->
+
+<div id="seccionPedidos" class="seccionAdmin hidden">
 
 <div class="panel" id="pedidosAdmin">
     <h2>Pedidos y ventas</h2>
@@ -354,10 +366,16 @@ XL:1"></textarea>
 
   <!-- INVENTARIO -->
 
+<div id="seccionInventario" class="seccionAdmin hidden">
+
 <div class="panel" id="inventarioAdmin">
     <h2>Inventario</h2>
     <div id="inventario" class="muted">Cargando inventario...</div>
   </div>
+
+</div>
+
+</section>
 
 </section>
 </main>
@@ -395,12 +413,10 @@ $("botonMenu").onclick = () => {
 
 function irSeccion(seccion) {
   const destinos = {
-    resumen: "resumenAdmin",
-    pedidos: "pedidosAdmin",
-    productos: "productosAdmin",
-    inventario: "inventarioAdmin",
-    estadisticas: "estadisticasAdmin",
-    balance: "balanceAdmin"
+    resumen: "seccionResumen",
+    pedidos: "seccionPedidos",
+    productos: "seccionProductos",
+    inventario: "seccionInventario"
   };
 
   const destino = destinos[seccion];
@@ -411,11 +427,17 @@ function irSeccion(seccion) {
     return;
   }
 
+  document.querySelectorAll(".seccionAdmin").forEach(seccion => {
+    seccion.classList.add("hidden");
+  });
+
+  $(destino).classList.remove("hidden");
+
   $("menuAdmin").classList.add("hidden");
 
-  $(destino).scrollIntoView({
-    behavior: "smooth",
-    block: "start"
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
   });
 }
 function mostrarLogin() {
