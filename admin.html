@@ -868,6 +868,66 @@ $("cancelarEdicion").onclick = () => {
   $("mensajeEdicion").textContent = "";
   productoEditando = null;
 };
+
+ // CONTROLES DE STOCK + Y -
+
+function cambiarStock(talleId, cambio) {
+  const campo = $("stock-" + talleId);
+  const actual = Number(campo.value) || 0;
+  const nuevo = Math.max(0, actual + cambio);
+
+  campo.value = nuevo;
+}
+
+// GUARDAR TODOS LOS CAMBIOS DE UN PRODUCTO
+
+async function guardarStockProducto(productoId, tallesIds, boton) {
+  const cambios = tallesIds.filter(id => {
+    const campo = $("stock-" + id);
+    return Number(campo.value) !== Number(campo.dataset.original);
+  });
+
+  if (!cambios.length) {
+    alert("No hay cambios de stock para guardar.");
+    return;
+  }
+
+  boton.disabled = true;
+  boton.textContent = "Guardando...";
+
+  try {
+    for (const talleId of cambios) {
+      const campo = $("stock-" + talleId);
+      const nuevoStock = Number(campo.value);
+
+      if (!Number.isInteger(nuevoStock) || nuevoStock < 0) {
+        throw new Error("Revisá las cantidades ingresadas.");
+      }
+
+      const { error } = await db.rpc("admin_actualizar_stock", {
+        p_talle_id: talleId,
+        p_nuevo_stock: nuevoStock,
+        p_motivo: "Ajuste desde administrador"
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    alert("¡Stock actualizado correctamente!");
+
+    await cargarDatos();
+
+  } catch (error) {
+    console.error(error);
+    alert("No se pudieron guardar todos los cambios: " + error.message);
+
+  } finally {
+    boton.disabled = false;
+    boton.textContent = "Guardar cambios";
+  }
+}
 // ACTUALIZAR STOCK
 
 async function guardarStock(talleId) {
@@ -1001,28 +1061,57 @@ async function cargarDatos() {
   ✏️ Editar producto
 </button>
 
-          ${variantes.length ? variantes.map(v => `
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
-              <strong>${escapar(v.talle)}</strong>
+                    ${variantes.length ? `
+            <div style="margin-top:15px">
+              <strong>Stock por talle</strong>
 
-              <input
-                id="stock-${Number(v.id)}"
-                type="number"
-                min="0"
-                step="1"
-                value="${Number(v.stock)}"
-                style="width:85px;margin:0;padding:9px"
-              >
+              ${variantes.map(v => `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0;padding:10px;background:#f5f5f5;border-radius:9px">
 
-              <span class="muted">unidades</span>
+                  <strong style="min-width:45px">
+                    ${escapar(v.talle)}
+                  </strong>
+
+                  <div style="display:flex;align-items:center;gap:8px">
+
+                    <button
+                      type="button"
+                      class="sec"
+                      onclick="cambiarStock(${Number(v.id)},-1)"
+                      style="padding:9px 13px;font-size:18px"
+                    >−</button>
+
+                    <input
+                      id="stock-${Number(v.id)}"
+                      data-original="${Number(v.stock)}"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value="${Number(v.stock)}"
+                      style="width:65px;margin:0;padding:9px;text-align:center;font-weight:bold"
+                    >
+
+                    <button
+                      type="button"
+                      onclick="cambiarStock(${Number(v.id)},1)"
+                      style="padding:9px 13px;font-size:18px"
+                    >+</button>
+
+                  </div>
+
+                </div>
+              `).join("")}
 
               <button
                 type="button"
-                onclick="guardarStock(${Number(v.id)})"
-                style="padding:9px 12px"
-              >Guardar</button>
+                onclick="guardarStockProducto('${escapar(producto.id)}',[${variantes.map(v => Number(v.id)).join(",")}],this)"
+                style="width:100%;margin-top:8px"
+              >
+                Guardar cambios
+              </button>
+
             </div>
-          `).join("") : `
+          ` : `
             <p class="muted">Este producto todavía no tiene talles cargados.</p>
           `}
         </div>
