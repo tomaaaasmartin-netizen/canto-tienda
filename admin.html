@@ -873,22 +873,26 @@ $("cancelarEdicion").onclick = () => {
 // AGREGAR UN NUEVO TALLE A UN PRODUCTO
 
 async function agregarTalle(productoId) {
-  const talle = prompt("¿Qué talle querés agregar?");
+  const campoTalle = $("nuevoTalle-" + productoId);
+  const campoCantidad = $("nuevaCantidad-" + productoId);
 
-  if (!talle || !talle.trim()) return;
-
-  const cantidadTexto = prompt("¿Cuántas unidades ingresaron?");
-
-  if (cantidadTexto === null || cantidadTexto.trim() === "") return;
-
+  const talleLimpio = campoTalle.value.trim();
+  const cantidadTexto = campoCantidad.value.trim();
   const cantidad = Number(cantidadTexto);
 
-  if (!Number.isInteger(cantidad) || cantidad < 0) {
-    alert("Ingresá una cantidad válida, igual o mayor a cero.");
+  if (!talleLimpio) {
+    alert("Ingresá el nombre del talle.");
     return;
   }
 
-  const talleLimpio = talle.trim();
+  if (
+    cantidadTexto === "" ||
+    !Number.isInteger(cantidad) ||
+    cantidad < 0
+  ) {
+    alert("Ingresá una cantidad válida.");
+    return;
+  }
 
   const { data: existentes, error: errorConsulta } = await db
     .from("talles")
@@ -897,7 +901,6 @@ async function agregarTalle(productoId) {
 
   if (errorConsulta) {
     alert("No se pudieron consultar los talles existentes.");
-    console.error(errorConsulta);
     return;
   }
 
@@ -906,7 +909,7 @@ async function agregarTalle(productoId) {
   );
 
   if (repetido) {
-    alert("Ese talle ya existe en este producto. Podés modificar su stock desde los controles actuales.");
+    alert("Ese talle ya existe en este producto.");
     return;
   }
 
@@ -921,22 +924,13 @@ async function agregarTalle(productoId) {
 
   if (error) {
     alert("No se pudo agregar el talle: " + error.message);
-    console.error(error);
     return;
   }
 
-  alert("¡Nuevo talle agregado correctamente!");
+  alert("¡Talle agregado correctamente!");
 
   await cargarDatos();
 }
-function cambiarStock(talleId, cambio) {
-  const campo = $("stock-" + talleId);
-  const actual = Number(campo.value) || 0;
-  const nuevo = Math.max(0, actual + cambio);
-
-  campo.value = nuevo;
-}
-
 // GUARDAR TODOS LOS CAMBIOS DE UN PRODUCTO
 
 async function guardarStockProducto(productoId, tallesIds, boton) {
@@ -1122,14 +1116,39 @@ async function cargarDatos() {
                     ${variantes.length ? `
             <div style="margin-top:15px">
               <strong>Stock por talle</strong>
-              <button
-  type="button"
-  class="sec"
-  onclick="agregarTalle('${escapar(producto.id)}')"
-  style="width:100%;margin:12px 0"
->
-  ＋ Agregar talle
-</button>
+              <div style="background:#f5f5f5;padding:13px;border-radius:10px;margin:12px 0">
+
+  <strong>＋ Agregar talle nuevo</strong>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+
+    <input
+      id="nuevoTalle-${escapar(producto.id)}"
+      type="text"
+      placeholder="Talle (Ej: XXL)"
+      style="flex:1;min-width:110px;margin:0"
+    >
+
+    <input
+      id="nuevaCantidad-${escapar(producto.id)}"
+      type="number"
+      min="0"
+      step="1"
+      placeholder="Cantidad"
+      style="flex:1;min-width:100px;margin:0"
+    >
+
+  </div>
+
+  <button
+    type="button"
+    onclick="agregarTalle('${escapar(producto.id)}')"
+    style="width:100%;margin-top:10px"
+  >
+    Agregar al producto
+  </button>
+
+</div>
 
               ${variantes.map(v => `
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0;padding:10px;background:#f5f5f5;border-radius:9px">
