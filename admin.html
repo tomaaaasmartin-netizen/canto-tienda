@@ -1111,11 +1111,7 @@ async function cargarDatos() {
       );
 
       return `
-        <div
-  class="item producto-inventario"
-  data-nombre="${escapar(producto.nombre || "")}"
-  data-codigo="${escapar(producto.codigo || "")}"
->
+        <div class="item">
           <strong>${escapar(pedido.numero_pedido || "Pedido #" + pedido.id)}</strong>
           <span class="tag">${escapar(pedido.estado)}</span>
 
@@ -1152,7 +1148,11 @@ async function cargarDatos() {
       );
 
       return `
-        <div class="item">
+        <div
+  class="item producto-inventario"
+  data-nombre="${escapar((producto.marca || "") + " " + (producto.nombre || ""))}"
+  data-codigo="${escapar(producto.codigo || "")}"
+>
           <strong>${escapar(producto.marca)} ${escapar(producto.nombre)}</strong>
 
           <p class="muted">
