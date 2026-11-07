@@ -705,6 +705,35 @@ $("formProducto").addEventListener("submit", async (e) => {
     boton.disabled = false;
   }
 });
+ // ACTIVAR O DESACTIVAR PRODUCTOS
+
+async function cambiarEstadoProducto(id, estadoActual) {
+  const nuevoEstado = !estadoActual;
+
+  const mensaje = nuevoEstado
+    ? "¿Querés volver a publicar este producto en CANTO?"
+    : "¿Querés ocultar este producto de la tienda?";
+
+  if (!confirm(mensaje)) return;
+
+  const { error } = await db
+    .from("productos")
+    .update({ activo: nuevoEstado })
+    .eq("id", id);
+
+  if (error) {
+    alert("No se pudo cambiar el estado: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  alert(nuevoEstado
+    ? "¡Producto activado correctamente!"
+    : "Producto desactivado. Ya no aparecerá en la tienda."
+  );
+
+  await cargarDatos();
+}
 // ABRIR FORMULARIO PARA EDITAR PRODUCTO
 
 let productoEditando = null;
@@ -1105,6 +1134,13 @@ async function cargarDatos() {
   Estado: ${producto.activo ? "Activo" : "Inactivo"}
 </p>
 
+<button
+  type="button"
+  onclick="cambiarEstadoProducto('${escapar(producto.id)}', ${producto.activo})"
+  style="width:100%;margin-bottom:12px;background:${producto.activo ? '#b42318' : '#16803c'}"
+>
+  ${producto.activo ? "Desactivar producto" : "Activar producto"}
+</button>
 <button
   type="button"
   onclick="editarProducto('${escapar(producto.id)}')"
