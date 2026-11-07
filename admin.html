@@ -372,6 +372,15 @@ XL:1"></textarea>
 
 <div class="panel" id="inventarioAdmin">
     <h2>Inventario</h2>
+ <div style="margin:15px 0">
+  <input
+    type="search"
+    id="buscarInventario"
+    placeholder="🔎 Buscar por nombre o código..."
+    oninput="filtrarInventario()"
+    style="width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:15px"
+  >
+ </div>
     <div id="inventario" class="muted">Cargando inventario...</div>
   </div>
 
@@ -1037,7 +1046,24 @@ async function guardarStock(talleId) {
 }
 
 // CARGAR PEDIDOS E INVENTARIO
+// BUSCADOR DE PRODUCTOS DEL INVENTARIO
 
+function filtrarInventario() {
+  const busqueda = $("buscarInventario").value
+    .trim()
+    .toLowerCase();
+
+  document.querySelectorAll(".producto-inventario").forEach(producto => {
+    const nombre = producto.dataset.nombre || "";
+    const codigo = producto.dataset.codigo || "";
+
+    const coincide =
+      nombre.toLowerCase().includes(busqueda) ||
+      codigo.toLowerCase().includes(busqueda);
+
+    producto.style.display = coincide ? "" : "none";
+  });
+}
 async function cargarDatos() {
   $("pedidos").textContent = "Cargando pedidos...";
   $("inventario").textContent = "Cargando inventario...";
@@ -1085,7 +1111,11 @@ async function cargarDatos() {
       );
 
       return `
-        <div class="item">
+        <div
+  class="item producto-inventario"
+  data-nombre="${escapar(producto.nombre || "")}"
+  data-codigo="${escapar(producto.codigo || "")}"
+>
           <strong>${escapar(pedido.numero_pedido || "Pedido #" + pedido.id)}</strong>
           <span class="tag">${escapar(pedido.estado)}</span>
 
