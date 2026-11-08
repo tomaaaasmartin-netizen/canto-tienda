@@ -909,7 +909,18 @@ $("cancelarEdicion").onclick = () => {
 
  // CONTROLES DE STOCK + Y -
 // AGREGAR UN NUEVO TALLE A UN PRODUCTO
+// SUMAR O RESTAR STOCK CON LOS BOTONES + Y -
 
+function cambiarStock(talleId, cantidad) {
+  const campo = $("stock-" + talleId);
+
+  if (!campo) return;
+
+  const actual = Number(campo.value);
+  const stockActual = Number.isInteger(actual) ? actual : 0;
+
+  campo.value = Math.max(0, stockActual + cantidad);
+}
 async function agregarTalle(productoId) {
   const campoTalle = $("nuevoTalle-" + productoId);
   const campoCantidad = $("nuevaCantidad-" + productoId);
